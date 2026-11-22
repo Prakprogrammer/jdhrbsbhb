@@ -127,13 +127,12 @@ impl<'a> Lines<'a> {
         }
         let s = self.start;
         self.start = end + 1;
-        let line = &self.buf[s..end];
-        if quoted {
-            return Some(fields::<N>(line));
-        }
         if commas != N - 1 {
             return Some(None);
         }
+        // Every comma separates fields (no value holds one, quoted or not),
+        // so the comma positions give the fields; quotes are then checked
+        // per field exactly as `unquote` does.
         let mut out: [&[u8]; N] = [&[]; N];
         let mut a = s;
         for i in 0..N - 1 {
@@ -141,6 +140,14 @@ impl<'a> Lines<'a> {
             a = cut[i] + 1;
         }
         out[N - 1] = &self.buf[a..end];
+        if quoted {
+            for f in out.iter_mut() {
+                match unquote(f) {
+                    Some(u) => *f = u,
+                    None => return Some(None),
+                }
+            }
+        }
         Some(Some(out))
     }
 }
@@ -150,7 +157,7 @@ mod scan_tests {
     use super::*;
     #[test]
     fn same_as_exact() {
-        let body = b"a,b\n\"x\",y\nbad\n\nq\"r,s\n,\n\"\",\"\"\nlast,one";
+        let body = b"a,b\n\"x\",y\nbad\n\nq\"r,s\n,\n\"\",\"\"\n\"a\"b,c\n\",c\n\"a,b\"\n\" u\",v\r\nlast,one";
         let mut l = Lines::new(body);
         let mut got = vec![];
         while let Some(f) = l.next_fields::<2>() {
