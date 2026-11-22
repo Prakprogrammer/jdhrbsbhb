@@ -477,15 +477,52 @@ fn free_grouped_bg<T: Copy>(parts: Vec<Grouped<T>>) {
     free_bg(parts.into_iter().map(|p| p.v).collect());
 }
 
+/// For each distinct key in `b`, marks the one record to keep: the copy
+/// `better` prefers, the first one read on a tie. One pass over a
+/// linear-probing table of record indices, sized to stay in cache; keys are
+/// uniform hashes, so their low bits index the table directly.
+fn pick_unique<T>(b: &[T], key: impl Fn(&T) -> K, better: impl Fn(&T, &T) -> bool) -> Vec<bool> {
+    const EMPTY: u32 = u32::MAX;
+    let cap = (b.len() + b.len() / 2).next_power_of_two().max(16);
+    let mask = cap - 1;
+    let mut slot = vec![EMPTY; cap];
+    for (i, x) in b.iter().enumerate() {
+        let k = key(x);
+        let mut h = k.1 as usize & mask;
+        loop {
+            let s = slot[h];
+            if s == EMPTY {
+                slot[h] = i as u32;
+                break;
+            }
+            let o = &b[s as usize];
+            if key(o) == k {
+                if better(x, o) {
+                    slot[h] = i as u32;
+                }
+                break;
+            }
+            h = (h + 1) & mask;
+        }
+    }
+    let mut keep = vec![false; b.len()];
+    for s in slot {
+        if s != EMPTY {
+            keep[s as usize] = true;
+        }
+    }
+    keep
+}
+
 /// Events of key group `g`: keep the smallest-ingest_ts copy of each
-/// event_id if it is valid, regroup by person.
+/// event_id if it is valid (copies with equal ingest_ts are identical),
+/// regroup by person.
 fn dedup_events<'a>(parts: &[Grouped<ERec<'a>>], g: usize) -> Grouped<PEv<'a>> {
-    let mut b = gather(parts, g);
-    b.sort_unstable_by(|x, y| x.key.cmp(&y.key).then(x.ingest.cmp(&y.ingest)));
+    let b = gather(parts, g);
+    let keep = pick_unique(&b, |e| e.key, |a, o| a.ingest < o.ingest);
     let mut out = Vec::with_capacity(b.len());
-    for i in 0..b.len() {
-        let e = &b[i];
-        if (i == 0 || b[i - 1].key != e.key) && e.ok {
+    for (e, k) in b.iter().zip(keep) {
+        if k && e.ok {
             out.push(PEv { pkey: e.pkey, ts: e.ts, name: e.name, price: e.price, cat: e.cat, typ: e.typ });
         }
     }
@@ -495,12 +532,11 @@ fn dedup_events<'a>(parts: &[Grouped<ERec<'a>>], g: usize) -> Grouped<PEv<'a>> {
 /// Clicks of key group `g`: copies are identical, keep one per click_id if
 /// valid, regroup by person.
 fn dedup_clicks<'a>(parts: &[Grouped<CRec<'a>>], g: usize) -> Grouped<PCk<'a>> {
-    let mut b = gather(parts, g);
-    b.sort_unstable_by(|x, y| x.key.cmp(&y.key));
+    let b = gather(parts, g);
+    let keep = pick_unique(&b, |c| c.key, |_, _| false);
     let mut out = Vec::with_capacity(b.len());
-    for i in 0..b.len() {
-        let c = &b[i];
-        if (i == 0 || b[i - 1].key != c.key) && c.ok {
+    for (c, k) in b.iter().zip(keep) {
+        if k && c.ok {
             out.push(PCk { pkey: c.pkey, ts: c.ts, cid: c.cid, camp: c.camp });
         }
     }
