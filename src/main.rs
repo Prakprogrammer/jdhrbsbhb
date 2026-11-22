@@ -9,7 +9,6 @@ mod ptab;
 mod ts;
 
 use memmap2::Mmap;
-use parquet::data_type::ByteArray;
 use rayon::prelude::*;
 use rustc_hash::FxHashMap;
 use std::fs::File;
@@ -754,49 +753,69 @@ fn main() {
         );
     lap("sessions");
 
-    // Output.
-    let ur = out::UserRows {
-        user_id: urows.iter().map(|r| ByteArray::from(r.name.to_vec())).collect(),
-        day: urows.iter().map(|r| r.day).collect(),
-        sessions: urows.iter().map(|r| r.sessions).collect(),
-        events: urows.iter().map(|r| r.events).collect(),
-        revenue: urows.iter().map(|r| r.revenue).collect(),
-        top: urows.iter().map(|r| r.top.map(|c| ByteArray::from(cat_names[c as usize].clone()))).collect(),
-    };
+    // Output: columns borrow the names straight from the inputs.
+    let organic: &[u8] = b"organic";
+    let u_id: Vec<&[u8]> = urows.par_iter().map(|r| r.name).collect();
+    let u_day: Vec<i32> = urows.par_iter().map(|r| r.day).collect();
+    let u_sess: Vec<i64> = urows.par_iter().map(|r| r.sessions).collect();
+    let u_ev: Vec<i64> = urows.par_iter().map(|r| r.events).collect();
+    let u_rev: Vec<i64> = urows.par_iter().map(|r| r.revenue).collect();
+    let u_top: Vec<Option<&[u8]>> = urows.par_iter().map(|r| r.top.map(|c| &cat_names[c as usize][..])).collect();
     let mut ck_rows: Vec<(&(u32, i32), &CAgg)> = cagg.iter().collect();
     ck_rows.sort_by_key(|x| *x.0);
-    let cname = |c: u32| -> (Vec<u8>, Vec<u8>) {
+    let cname = |c: u32| -> (&[u8], &[u8]) {
         if c == ORGANIC {
-            (b"organic".to_vec(), b"organic".to_vec())
+            (organic, organic)
         } else {
-            (camp_rows[c as usize][0].clone(), camp_rows[c as usize][1].clone())
+            (&camp_rows[c as usize][0], &camp_rows[c as usize][1])
         }
     };
-    let cr = out::CampRows {
-        campaign_id: ck_rows.iter().map(|x| ByteArray::from(cname(x.0 .0).0)).collect(),
-        channel: ck_rows.iter().map(|x| ByteArray::from(cname(x.0 .0).1)).collect(),
-        day: ck_rows.iter().map(|x| x.0 .1).collect(),
-        sessions: ck_rows.iter().map(|x| x.1.sessions).collect(),
-        purchasing: ck_rows.iter().map(|x| x.1.purchasing).collect(),
-        revenue: ck_rows.iter().map(|x| x.1.revenue).collect(),
-        assisted: ck_rows.iter().map(|x| x.1.assisted).collect(),
-    };
+    let c_id: Vec<&[u8]> = ck_rows.iter().map(|x| cname(x.0 .0).0).collect();
+    let c_ch: Vec<&[u8]> = ck_rows.iter().map(|x| cname(x.0 .0).1).collect();
+    let c_day: Vec<i32> = ck_rows.iter().map(|x| x.0 .1).collect();
+    let c_sess: Vec<i64> = ck_rows.iter().map(|x| x.1.sessions).collect();
+    let c_purch: Vec<i64> = ck_rows.iter().map(|x| x.1.purchasing).collect();
+    let c_rev: Vec<i64> = ck_rows.iter().map(|x| x.1.revenue).collect();
+    let c_ass: Vec<i64> = ck_rows.iter().map(|x| x.1.assisted).collect();
     lap("rows");
+    use out::Col;
+    let parts = rayon::current_num_threads().clamp(1, 16);
     rayon::join(
-        || out::write_user(&outd.join("user_daily"), &ur).expect("write user_daily"),
-        || out::write_camp(&outd.join("campaign_daily"), &cr).expect("write campaign_daily"),
+        || {
+            let cols = [
+                ("user_id", Col::Str(&u_id)),
+                ("day", Col::Date(&u_day)),
+                ("sessions", Col::I64(&u_sess)),
+                ("events", Col::I64(&u_ev)),
+                ("revenue_cents", Col::I64(&u_rev)),
+                ("top_category", Col::OptStr(&u_top)),
+            ];
+            out::write_table(&outd.join("user_daily"), &cols, parts).expect("write user_daily")
+        },
+        || {
+            let cols = [
+                ("campaign_id", Col::Str(&c_id)),
+                ("channel", Col::Str(&c_ch)),
+                ("day", Col::Date(&c_day)),
+                ("sessions", Col::I64(&c_sess)),
+                ("purchasing_sessions", Col::I64(&c_purch)),
+                ("revenue_cents", Col::I64(&c_rev)),
+                ("assisted_sessions", Col::I64(&c_ass)),
+            ];
+            out::write_table(&outd.join("campaign_daily"), &cols, 1).expect("write campaign_daily")
+        },
     );
     lap("write");
 
     // Self-check from the rules.
-    let us: i64 = ur.sessions.iter().sum();
-    let cs: i64 = cr.sessions.iter().sum();
-    let urv: i64 = ur.revenue.iter().sum();
-    let crv: i64 = cr.revenue.iter().sum();
+    let us: i64 = u_sess.iter().sum();
+    let cs: i64 = c_sess.iter().sum();
+    let urv: i64 = u_rev.iter().sum();
+    let crv: i64 = c_rev.iter().sum();
     eprintln!(
         "[check] rows user={} camp={} sessions {us}/{cs} revenue {urv}/{crv} events={n_ev_rows} events_kept={} clicks_kept={} links={}",
-        ur.day.len(),
-        cr.day.len(),
+        u_day.len(),
+        c_day.len(),
         n_kept,
         n_kclicks,
         links.len()
