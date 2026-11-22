@@ -117,15 +117,46 @@ fn manifest(dir: &Path) -> (i64, i64) {
 
 // ---------------------------------------------------------------- records
 
-/// One event line, already resolved to its person (links are read first).
-/// `key` is the 128-bit key of `event_id`.
+/// A 128-bit key as (high, low) u64 halves. Ordering matches the u128, but
+/// the 8-byte alignment lets records pack without u128's 16-byte padding.
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default)]
+struct K(u64, u64);
+
+impl From<u128> for K {
+    #[inline]
+    fn from(x: u128) -> K {
+        K((x >> 64) as u64, x as u64)
+    }
+}
+
+/// Frees record vectors on a background thread so the unmap cost overlaps
+/// the next stage instead of stalling it. `T: Copy` has no destructor, so
+/// releasing the raw allocations is all a drop would do.
+fn free_bg<T: Copy>(vs: Vec<Vec<T>>) {
+    let raw: Vec<(usize, std::alloc::Layout)> = vs
+        .into_iter()
+        .filter(|v| v.capacity() > 0 && std::mem::size_of::<T>() > 0)
+        .map(|v| {
+            let mut v = std::mem::ManuallyDrop::new(v);
+            (v.as_mut_ptr() as usize, std::alloc::Layout::array::<T>(v.capacity()).unwrap())
+        })
+        .collect();
+    std::thread::spawn(move || {
+        for (p, l) in raw {
+            // SAFETY: each pair is a live Vec allocation we took ownership of.
+            unsafe { std::alloc::dealloc(p as *mut u8, l) }
+        }
+    });
+}
+
+/// One event line (56 bytes). `key` is the key of `event_id`. The person is
+/// resolved only for the copy that survives dedup, not for every line.
 #[derive(Clone, Copy)]
 struct ERec<'a> {
-    key: u128,
-    pkey: u128,
+    key: K,
     ingest: i64,
     ts: i64,
-    name: &'a [u8],
+    uid: &'a [u8],
     price: u32,
     cat: u16,
     typ: u8,
@@ -135,8 +166,8 @@ struct ERec<'a> {
 /// One click line, resolved to its person. `key` is the key of `click_id`.
 #[derive(Clone, Copy)]
 struct CRec<'a> {
-    key: u128,
-    pkey: u128,
+    key: K,
+    pkey: K,
     ts: i64,
     cid: &'a [u8],
     camp: u32,
@@ -146,7 +177,7 @@ struct CRec<'a> {
 /// A surviving event, keyed by its person.
 #[derive(Clone, Copy)]
 struct PEv<'a> {
-    pkey: u128,
+    pkey: K,
     ts: i64,
     name: &'a [u8],
     price: u32,
@@ -157,7 +188,7 @@ struct PEv<'a> {
 /// A surviving click, keyed by its person.
 #[derive(Clone, Copy)]
 struct PCk<'a> {
-    pkey: u128,
+    pkey: K,
     ts: i64,
     cid: &'a [u8],
     camp: u32,
@@ -191,7 +222,6 @@ fn person<'a>(persons: &Persons<'a>, uid: &'a [u8]) -> (u128, &'a [u8]) {
     }
 }
 
-static X_NOPERSON: std::sync::LazyLock<bool> = std::sync::LazyLock::new(|| std::env::var("X_NOPERSON").is_ok());
 static X_NOTS: std::sync::LazyLock<bool> = std::sync::LazyLock::new(|| std::env::var("X_NOTS").is_ok());
 static X_NOKEY: std::sync::LazyLock<bool> = std::sync::LazyLock::new(|| std::env::var("X_NOKEY").is_ok());
 
@@ -229,13 +259,9 @@ fn parse_events<'a>(chunk: &'a [u8], cx: &Ctx<'a, '_>) -> Vec<ERec<'a>> {
             && !f[5].is_empty()
             && price.is_some()
             && ingest.saturating_sub(tsv) <= LATE;
-        let (pkey, name, cat) = if ok && !*X_NOPERSON {
-            let (pk, nm) = person(cx.persons, f[1]);
-            (pk, nm, cx.prod.get(f[5]).copied().unwrap_or(cx.unknown))
-        } else {
-            (0, &f[1][..0], 0)
-        };
-        v.push(ERec { key: if *X_NOKEY { f[0].len() as u128 } else { key::k128(f[0]) }, pkey, ingest, ts: tsv, name, price: price.unwrap_or(0), cat, typ, ok });
+        let cat = if ok { cx.prod.get(f[5]).copied().unwrap_or(cx.unknown) } else { 0 };
+        let key = if *X_NOKEY { f[0].len() as u128 } else { key::k128(f[0]) };
+        v.push(ERec { key: key.into(), ingest, ts: tsv, uid: f[1], price: price.unwrap_or(0), cat, typ, ok });
     }
     v
 }
@@ -254,7 +280,7 @@ fn parse_clicks<'a>(chunk: &'a [u8], cx: &Ctx<'a, '_>) -> Vec<CRec<'a>> {
         let camp = cx.camps.get(f[2]).copied();
         let ok = !f[1].is_empty() && t.is_some() && lo <= tsv && tsv < cx.we && camp.is_some();
         let pkey = if ok { person(cx.persons, f[1]).0 } else { 0 };
-        v.push(CRec { key: key::k128(f[0]), pkey, ts: tsv, cid: f[0], camp: camp.unwrap_or(0), ok });
+        v.push(CRec { key: key::k128(f[0]).into(), pkey: pkey.into(), ts: tsv, cid: f[0], camp: camp.unwrap_or(0), ok });
     }
     v
 }
@@ -335,8 +361,8 @@ fn build_persons<'a>(links: &[(&'a [u8], &'a [u8])]) -> Persons<'a> {
 const NB: usize = 1 << 12;
 
 #[inline]
-fn bucket(k: u128) -> usize {
-    (k >> (128 - 12)) as usize
+fn bucket(k: K) -> usize {
+    (k.0 >> (64 - 12)) as usize
 }
 
 fn split_mut<'s, T>(v: &'s mut [T], off: &[usize]) -> Vec<&'s mut [T]> {
@@ -356,9 +382,12 @@ const GROUP: usize = 64;
 
 /// Events: scatter by event_id key, keep the smallest ingest_ts copy of each
 /// key if it is valid. Returns survivors as pieces for the person scatter.
-fn dedup_events<'a>(parts: &[Vec<ERec<'a>>]) -> Vec<Vec<PEv<'a>>> {
-    let pieces: Vec<&[ERec]> = parts.iter().map(|p| &p[..]).collect();
-    let (mut v, off) = part::scatter_pieces(&pieces, NB, |x| bucket(x.key));
+fn dedup_events<'a>(parts: Vec<Vec<ERec<'a>>>, persons: &Persons<'a>) -> Vec<Vec<PEv<'a>>> {
+    let (mut v, off) = {
+        let pieces: Vec<&[ERec]> = parts.iter().map(|p| &p[..]).collect();
+        part::scatter_pieces(&pieces, NB, |x| bucket(x.key))
+    };
+    free_bg(parts);
     let bs = split_mut(&mut v, &off);
     let mut groups: Vec<Vec<&mut [ERec]>> = vec![];
     let mut it = bs.into_iter();
@@ -378,7 +407,8 @@ fn dedup_events<'a>(parts: &[Vec<ERec<'a>>]) -> Vec<Vec<PEv<'a>>> {
                 for i in 0..b.len() {
                     let e = &b[i];
                     if (i == 0 || b[i - 1].key != e.key) && e.ok {
-                        out.push(PEv { pkey: e.pkey, ts: e.ts, name: e.name, price: e.price, cat: e.cat, typ: e.typ });
+                        let (pk, name) = person(persons, e.uid);
+                        out.push(PEv { pkey: pk.into(), ts: e.ts, name, price: e.price, cat: e.cat, typ: e.typ });
                     }
                 }
             }
@@ -388,9 +418,12 @@ fn dedup_events<'a>(parts: &[Vec<ERec<'a>>]) -> Vec<Vec<PEv<'a>>> {
 }
 
 /// Clicks: copies are identical, keep one per click_id if valid.
-fn dedup_clicks<'a>(parts: &[Vec<CRec<'a>>]) -> Vec<Vec<PCk<'a>>> {
-    let pieces: Vec<&[CRec]> = parts.iter().map(|p| &p[..]).collect();
-    let (mut v, off) = part::scatter_pieces(&pieces, NB, |x| bucket(x.key));
+fn dedup_clicks<'a>(parts: Vec<Vec<CRec<'a>>>) -> Vec<Vec<PCk<'a>>> {
+    let (mut v, off) = {
+        let pieces: Vec<&[CRec]> = parts.iter().map(|p| &p[..]).collect();
+        part::scatter_pieces(&pieces, NB, |x| bucket(x.key))
+    };
+    free_bg(parts);
     let bs = split_mut(&mut v, &off);
     let mut groups: Vec<Vec<&mut [CRec]>> = vec![];
     let mut it = bs.into_iter();
@@ -627,18 +660,23 @@ fn main() {
     );
     lap("parse");
 
-    let (ev_surv, ck_surv) = rayon::join(|| dedup_events(&ev_parts), || dedup_clicks(&ck_parts));
     let n_ev_rows: usize = ev_parts.iter().map(|p| p.len()).sum();
+    let pr = &persons;
+    let (ev_surv, ck_surv) = rayon::join(move || dedup_events(ev_parts, pr), move || dedup_clicks(ck_parts));
     let n_kept: usize = ev_surv.iter().map(|p| p.len()).sum();
     let n_kclicks: usize = ck_surv.iter().map(|p| p.len()).sum();
     lap("dedup");
 
-    let ev_pieces: Vec<&[PEv]> = ev_surv.iter().map(|p| &p[..]).collect();
-    let ck_pieces: Vec<&[PCk]> = ck_surv.iter().map(|p| &p[..]).collect();
-    let ((mut pev, eoff), (mut pck, coff)) = rayon::join(
-        || part::scatter_pieces(&ev_pieces, NB, |x| bucket(x.pkey)),
-        || part::scatter_pieces(&ck_pieces, NB, |x| bucket(x.pkey)),
-    );
+    let ((mut pev, eoff), (mut pck, coff)) = {
+        let ev_pieces: Vec<&[PEv]> = ev_surv.iter().map(|p| &p[..]).collect();
+        let ck_pieces: Vec<&[PCk]> = ck_surv.iter().map(|p| &p[..]).collect();
+        rayon::join(
+            || part::scatter_pieces(&ev_pieces, NB, |x| bucket(x.pkey)),
+            || part::scatter_pieces(&ck_pieces, NB, |x| bucket(x.pkey)),
+        )
+    };
+    free_bg(ev_surv);
+    free_bg(ck_surv);
     lap("persons");
 
 
@@ -697,6 +735,7 @@ fn main() {
         revenue: ck_rows.iter().map(|x| x.1.revenue).collect(),
         assisted: ck_rows.iter().map(|x| x.1.assisted).collect(),
     };
+    lap("rows");
     rayon::join(
         || out::write_user(&outd.join("user_daily"), &ur).expect("write user_daily"),
         || out::write_camp(&outd.join("campaign_daily"), &cr).expect("write campaign_daily"),
