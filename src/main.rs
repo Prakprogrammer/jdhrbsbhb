@@ -1,7 +1,10 @@
-//! Shopping Sessions pipeline, baseline: a direct implementation of rules.md.
+//! Shopping Sessions pipeline: rules.md with 128-bit ID keys and parallel stages.
 //! Reads DATA_DIR (default /data), writes OUTPUT_DIR (default /output).
 
+mod alloc;
 mod csv;
+mod key;
+mod part;
 mod out;
 mod ts;
 
@@ -13,6 +16,9 @@ use std::fs::File;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 use ts::MS_DAY;
+
+#[global_allocator]
+static GLOBAL: alloc::Alloc = alloc::Alloc;
 
 const SESSION_GAP: i64 = 1_800_000;
 const WEEK: i64 = 7 * MS_DAY;
@@ -111,23 +117,50 @@ fn manifest(dir: &Path) -> (i64, i64) {
 
 // ---------------------------------------------------------------- records
 
+/// One event line. `key` is the 128-bit key of `event_id`.
+#[derive(Clone, Copy)]
 struct Ev<'a> {
-    eid: &'a [u8],
-    uid: &'a [u8],
-    pid: &'a [u8],
-    ts: i64,
+    key: u128,
+    ukey: u128,
     ingest: i64,
+    ts: i64,
+    uid: &'a [u8],
     price: u32,
+    cat: u16,
     typ: u8,
     ok: bool,
 }
 
+/// One click line. `key` is the 128-bit key of `click_id`.
+#[derive(Clone, Copy)]
 struct Ck<'a> {
+    key: u128,
+    ukey: u128,
     cid: &'a [u8],
     uid: &'a [u8],
     ts: i64,
     camp: u32,
     ok: bool,
+}
+
+/// A surviving event, keyed by its person.
+#[derive(Clone, Copy)]
+struct PEv<'a> {
+    pkey: u128,
+    ts: i64,
+    name: &'a [u8],
+    price: u32,
+    cat: u16,
+    typ: u8,
+}
+
+/// A surviving click, keyed by its person.
+#[derive(Clone, Copy)]
+struct PCk<'a> {
+    pkey: u128,
+    ts: i64,
+    cid: &'a [u8],
+    camp: u32,
 }
 
 fn parse_price(b: &[u8]) -> Option<u32> {
@@ -148,10 +181,11 @@ fn parse_price(b: &[u8]) -> Option<u32> {
     }
 }
 
-fn parse_events<'a>(chunk: &'a [u8], ws: i64, we: i64) -> Vec<Ev<'a>> {
-    let mut v = Vec::with_capacity(chunk.len() / 90);
-    for line in chunk.split(|&c| c == b'\n') {
-        let Some(f) = csv::fields::<7>(line) else { continue };
+fn parse_events<'a>(chunk: &'a [u8], ws: i64, we: i64, prod: &FxHashMap<&[u8], u16>, unknown: u16) -> Vec<Ev<'a>> {
+    let mut v = Vec::with_capacity(chunk.len() / 80);
+    let mut lines = csv::Lines::new(chunk);
+    while let Some(f) = lines.next_fields::<7>() {
+        let Some(f) = f else { continue };
         if f[0].is_empty() {
             continue;
         }
@@ -173,16 +207,8 @@ fn parse_events<'a>(chunk: &'a [u8], ws: i64, we: i64) -> Vec<Ev<'a>> {
             && !f[5].is_empty()
             && price.is_some()
             && ingest.saturating_sub(tsv) <= LATE;
-        v.push(Ev {
-            eid: f[0],
-            uid: f[1],
-            pid: f[5],
-            ts: tsv,
-            ingest,
-            price: price.unwrap_or(0),
-            typ,
-            ok,
-        });
+        let cat = if ok { prod.get(f[5]).copied().unwrap_or(unknown) } else { 0 };
+        v.push(Ev { key: key::k128(f[0]), ukey: if ok { key::k128(f[1]) } else { 0 }, ingest, ts: tsv, uid: f[1], price: price.unwrap_or(0), cat, typ, ok });
     }
     v
 }
@@ -190,8 +216,9 @@ fn parse_events<'a>(chunk: &'a [u8], ws: i64, we: i64) -> Vec<Ev<'a>> {
 fn parse_clicks<'a>(chunk: &'a [u8], ws: i64, we: i64, camps: &FxHashMap<&[u8], u32>) -> Vec<Ck<'a>> {
     let mut v = Vec::with_capacity(chunk.len() / 50);
     let lo = ws - WEEK;
-    for line in chunk.split(|&c| c == b'\n') {
-        let Some(f) = csv::fields::<4>(line) else { continue };
+    let mut lines = csv::Lines::new(chunk);
+    while let Some(f) = lines.next_fields::<4>() {
+        let Some(f) = f else { continue };
         if f[0].is_empty() {
             continue;
         }
@@ -199,15 +226,16 @@ fn parse_clicks<'a>(chunk: &'a [u8], ws: i64, we: i64, camps: &FxHashMap<&[u8], 
         let tsv = t.unwrap_or(i64::MIN);
         let camp = camps.get(f[2]).copied();
         let ok = !f[1].is_empty() && t.is_some() && lo <= tsv && tsv < we && camp.is_some();
-        v.push(Ck { cid: f[0], uid: f[1], ts: tsv, camp: camp.unwrap_or(0), ok });
+        v.push(Ck { key: key::k128(f[0]), ukey: if ok { key::k128(f[1]) } else { 0 }, cid: f[0], uid: f[1], ts: tsv, camp: camp.unwrap_or(0), ok });
     }
     v
 }
 
 fn parse_links(chunk: &[u8]) -> Vec<(&[u8], &[u8])> {
     let mut v = vec![];
-    for line in chunk.split(|&c| c == b'\n') {
-        let Some(f) = csv::fields::<2>(line) else { continue };
+    let mut lines = csv::Lines::new(chunk);
+    while let Some(f) = lines.next_fields::<2>() {
+        let Some(f) = f else { continue };
         if f[0].is_empty() || f[1].is_empty() {
             continue;
         }
@@ -231,6 +259,241 @@ fn find(p: &mut [u32], mut x: u32) -> u32 {
     r
 }
 
+/// Linked IDs: key of each linked ID -> (person key, person name).
+struct Persons<'a> {
+    of: FxHashMap<u128, u32>,
+    pkey: Vec<u128>,
+    name: Vec<&'a [u8]>,
+}
+
+fn build_persons<'a>(links: &[(&'a [u8], &'a [u8])]) -> Persons<'a> {
+    let mut of: FxHashMap<u128, u32> = FxHashMap::default();
+    let mut ids: Vec<&[u8]> = vec![];
+    let mut parent: Vec<u32> = vec![];
+    let keys: Vec<(u128, u128)> = links.par_iter().map(|&(a, b)| (key::k128(a), key::k128(b))).collect();
+    for (&(a, b), &(ka, kb)) in links.iter().zip(&keys) {
+        let mut ix = |s: &'a [u8], k: u128| -> u32 {
+            *of.entry(k).or_insert_with(|| {
+                ids.push(s);
+                parent.push(ids.len() as u32 - 1);
+                ids.len() as u32 - 1
+            })
+        };
+        let ia = ix(a, ka);
+        let ib = ix(b, kb);
+        let (ra, rb) = (find(&mut parent, ia), find(&mut parent, ib));
+        if ra != rb {
+            parent[ra.max(rb) as usize] = ra.min(rb);
+        }
+    }
+    let n = ids.len();
+    let mut cname: Vec<Option<&[u8]>> = vec![None; n];
+    let mut root = vec![0u32; n];
+    for i in 0..n {
+        let r = find(&mut parent, i as u32) as usize;
+        root[i] = r as u32;
+        if cname[r].map_or(true, |c| ids[i] < c) {
+            cname[r] = Some(ids[i]);
+        }
+    }
+    let rkey: Vec<u128> = cname.par_iter().map(|c| c.map_or(0, key::k128)).collect();
+    let name: Vec<&[u8]> = (0..n).map(|i| cname[root[i] as usize].unwrap()).collect();
+    let pkey: Vec<u128> = (0..n).map(|i| rkey[root[i] as usize]).collect();
+    Persons { of, pkey, name }
+}
+
+// ---------------------------------------------------------------- partitioning
+
+const NB: usize = 1 << 12;
+
+#[inline]
+fn bucket(k: u128) -> usize {
+    (k >> (128 - 12)) as usize
+}
+
+/// Concatenates per-chunk vectors with a parallel copy.
+fn concat<T: Copy + Send + Sync>(parts: Vec<Vec<T>>) -> Vec<T> {
+    let n: usize = parts.iter().map(|p| p.len()).sum();
+    let mut out: Vec<T> = Vec::with_capacity(n);
+    let mut offs = Vec::with_capacity(parts.len());
+    let mut run = 0;
+    for p in &parts {
+        offs.push(run);
+        run += p.len();
+    }
+    struct P<T>(*mut T);
+    unsafe impl<T> Sync for P<T> {}
+    unsafe impl<T> Send for P<T> {}
+    let base = P(out.as_mut_ptr());
+    parts.par_iter().zip(offs.par_iter()).for_each(|(p, &o)| {
+        let base = &base;
+        // SAFETY: each part copies into its own disjoint range of `out`.
+        unsafe { std::ptr::copy_nonoverlapping(p.as_ptr(), base.0.add(o), p.len()) };
+    });
+    // SAFETY: all n elements were initialized above.
+    unsafe { out.set_len(n) };
+    out
+}
+
+fn split_mut<'s, T>(v: &'s mut [T], off: &[usize]) -> Vec<&'s mut [T]> {
+    let mut out = Vec::with_capacity(off.len() - 1);
+    let mut rest = v;
+    for w in off.windows(2) {
+        let (a, b) = rest.split_at_mut(w[1] - w[0]);
+        out.push(a);
+        rest = b;
+    }
+    out
+}
+
+/// For `(key, rank, index)` items, returns the index of the lowest-rank item
+/// of every key, when `ok(index)` holds for it.
+fn dedup_first<F: Fn(u32) -> bool + Sync>(items: &[(u128, i64, u32)], ok: F) -> Vec<u32> {
+    let (mut v, off) = part::scatter(items, NB, |x| bucket(x.0));
+    split_mut(&mut v, &off)
+        .into_par_iter()
+        .flat_map_iter(|b| {
+            b.sort_unstable();
+            let mut keep = vec![];
+            for i in 0..b.len() {
+                if (i == 0 || b[i - 1].0 != b[i].0) && ok(b[i].2) {
+                    keep.push(b[i].2);
+                }
+            }
+            keep
+        })
+        .collect()
+}
+
+/// Sessions, credit and assists for a run of persons. Both slices are sorted
+/// by (person, ts); clicks also by click_id within equal ts.
+fn process<'a>(
+    ev_all: &[PEv<'a>],
+    pck: &[PCk],
+    cat_rank: &[u16],
+    ncat: usize,
+) -> (Vec<URow<'a>>, FxHashMap<(u32, i32), CAgg>) {
+    let mut urows: Vec<URow> = vec![];
+    let mut cagg: FxHashMap<(u32, i32), CAgg> = FxHashMap::default();
+    let mut catsum = vec![0i64; ncat];
+    let mut touched: Vec<u16> = vec![];
+    let mut window: FxHashMap<u32, u32> = FxHashMap::default();
+    let top_of = |catsum: &mut Vec<i64>, touched: &mut Vec<u16>| -> Option<u16> {
+        let mut best: Option<u16> = None;
+        for &c in touched.iter() {
+            let s = catsum[c as usize];
+            best = match best {
+                None => Some(c),
+                Some(bc) => {
+                    let bs = catsum[bc as usize];
+                    if s > bs || (s == bs && cat_rank[c as usize] < cat_rank[bc as usize]) {
+                        Some(c)
+                    } else {
+                        Some(bc)
+                    }
+                }
+            };
+        }
+        for &c in touched.iter() {
+            catsum[c as usize] = 0;
+        }
+        touched.clear();
+        best
+    };
+    let mut ci = 0;
+    let mut a = 0;
+    while a < ev_all.len() {
+        let p = ev_all[a].pkey;
+        let mut b = a + 1;
+        while b < ev_all.len() && ev_all[b].pkey == p {
+            b += 1;
+        }
+        let ev = &ev_all[a..b];
+        let name = ev[0].name;
+        while ci < pck.len() && pck[ci].pkey < p {
+            ci += 1;
+        }
+        let c0 = ci;
+        while ci < pck.len() && pck[ci].pkey == p {
+            ci += 1;
+        }
+        let ck = &pck[c0..ci];
+        window.clear();
+        let (mut lo, mut hi) = (0usize, 0usize);
+        let mut u = URow { name, day: i32::MIN, sessions: 0, events: 0, revenue: 0, top: None };
+        let mut s = 0;
+        while s < ev.len() {
+            let start = ev[s].ts;
+            let mut e = s + 1;
+            while e < ev.len() && ev[e].ts - ev[e - 1].ts <= SESSION_GAP {
+                e += 1;
+            }
+            let sess = &ev[s..e];
+            let day = start.div_euclid(MS_DAY) as i32;
+            if day != u.day {
+                if u.sessions > 0 {
+                    let top = top_of(&mut catsum, &mut touched);
+                    urows.push(URow { top, ..u });
+                }
+                u = URow { name, day, sessions: 0, events: 0, revenue: 0, top: None };
+            }
+            let mut rev = 0i64;
+            let mut purch = false;
+            for x in sess {
+                if x.typ == T_PURCHASE {
+                    purch = true;
+                    rev += x.price as i64;
+                    if catsum[x.cat as usize] == 0 {
+                        touched.push(x.cat);
+                    }
+                    catsum[x.cat as usize] += x.price as i64;
+                }
+            }
+            u.sessions += 1;
+            u.events += sess.len() as i64;
+            u.revenue += rev;
+
+            // Click window [start - 7d, start].
+            while hi < ck.len() && ck[hi].ts <= start {
+                *window.entry(ck[hi].camp).or_insert(0) += 1;
+                hi += 1;
+            }
+            while lo < hi && ck[lo].ts < start - WEEK {
+                let w = window.get_mut(&ck[lo].camp).unwrap();
+                *w -= 1;
+                if *w == 0 {
+                    window.remove(&ck[lo].camp);
+                }
+                lo += 1;
+            }
+            let credited = if hi > lo {
+                let mt = ck[hi - 1].ts;
+                let mut k = hi - 1;
+                while k > lo && ck[k - 1].ts == mt {
+                    k -= 1;
+                }
+                ck[k].camp
+            } else {
+                ORGANIC
+            };
+            let ag = cagg.entry((credited, day)).or_default();
+            ag.sessions += 1;
+            ag.purchasing += purch as i64;
+            ag.revenue += rev;
+            for &camp in window.keys() {
+                cagg.entry((camp, day)).or_default().assisted += 1;
+            }
+            s = e;
+        }
+        if u.sessions > 0 {
+            let top = top_of(&mut catsum, &mut touched);
+            urows.push(URow { top, ..u });
+        }
+        a = b;
+    }
+    (urows, cagg)
+}
+
 // ---------------------------------------------------------------- main
 
 #[derive(Default, Clone, Copy)]
@@ -241,8 +504,8 @@ struct CAgg {
     assisted: i64,
 }
 
-struct URow {
-    pid: u32,
+struct URow<'a> {
+    name: &'a [u8],
     day: i32,
     sessions: i64,
     events: i64,
@@ -280,7 +543,6 @@ fn main() {
             n
         })
     };
-    // Category rank in byte order, for the top_category tie-break.
     let mut order: Vec<u16> = (0..cat_names.len() as u16).collect();
     order.sort_by(|&a, &b| cat_names[a as usize].cmp(&cat_names[b as usize]));
     let mut cat_rank = vec![0u16; cat_names.len()];
@@ -292,7 +554,7 @@ fn main() {
         camps.insert(&r[0], i as u32);
     }
 
-    // Read and parse.
+    // Read and parse, all in parallel.
     let ev_maps = map_all(&csv_files(&data.join("events")));
     let ck_maps = map_all(&csv_files(&data.join("clicks")));
     let lk_maps = map_all(&csv_files(&data.join("links")));
@@ -300,236 +562,74 @@ fn main() {
     let ck_chunks = chunks(&ck_maps);
     let lk_chunks = chunks(&lk_maps);
 
-    let (mut evs, (mut cks, links)) = rayon::join(
-        || ev_chunks.par_iter().flat_map_iter(|c| parse_events(c, ws, we)).collect::<Vec<_>>(),
+    let (evs, (cks, links)) = rayon::join(
+        || concat(ev_chunks.par_iter().map(|c| parse_events(c, ws, we, &prod, unknown)).collect()),
         || {
             rayon::join(
-                || ck_chunks.par_iter().flat_map_iter(|c| parse_clicks(c, ws, we, &camps)).collect::<Vec<_>>(),
+                || concat(ck_chunks.par_iter().map(|c| parse_clicks(c, ws, we, &camps)).collect()),
                 || lk_chunks.par_iter().flat_map_iter(|c| parse_links(c)).collect::<Vec<_>>(),
             )
         },
     );
     lap("parse");
 
-    // Dedup events: smallest ingest_ts per event_id, then keep it if valid.
-    evs.par_sort_unstable_by(|a, b| a.eid.cmp(b.eid).then(a.ingest.cmp(&b.ingest)));
-    let mut kept: Vec<&Ev> = Vec::with_capacity(evs.len());
-    let mut i = 0;
-    while i < evs.len() {
-        let e = &evs[i];
-        if e.ok {
-            kept.push(e);
-        }
-        let mut j = i + 1;
-        while j < evs.len() && evs[j].eid == e.eid {
-            j += 1;
-        }
-        i = j;
-    }
-    // Dedup clicks: copies are identical, keep any one.
-    cks.par_sort_unstable_by(|a, b| a.cid.cmp(b.cid));
-    let mut kclicks: Vec<&Ck> = Vec::with_capacity(cks.len());
-    let mut i = 0;
-    while i < cks.len() {
-        let c = &cks[i];
-        if c.ok {
-            kclicks.push(c);
-        }
-        let mut j = i + 1;
-        while j < cks.len() && cks[j].cid == c.cid {
-            j += 1;
-        }
-        i = j;
-    }
-    lap("dedup");
+    // Linked IDs, while events dedup in parallel.
+    let (persons, mut kept) = rayon::join(
+        || build_persons(&links),
+        || {
+            let ix: Vec<(u128, i64, u32)> = evs.par_iter().enumerate().map(|(i, e)| (e.key, e.ingest, i as u32)).collect();
+            dedup_first(&ix, |i| evs[i as usize].ok)
+        },
+    );
+    lap("dedup+links");
+    // Clicks: copies are identical, keep any one.
+    let cix: Vec<(u128, i64, u32)> = cks.par_iter().enumerate().map(|(i, c)| (c.key, 0, i as u32)).collect();
+    let mut kclicks = dedup_first(&cix, |i| cks[i as usize].ok);
+    rayon::join(|| kept.par_sort_unstable(), || kclicks.par_sort_unstable());
+    lap("  click-dedup");
 
-    // Linked IDs.
-    let mut lid: FxHashMap<&[u8], u32> = FxHashMap::default();
-    let mut ids: Vec<&[u8]> = vec![];
-    let mut parent: Vec<u32> = vec![];
-    for &(a, b) in &links {
-        let ia = *lid.entry(a).or_insert_with(|| {
-            ids.push(a);
-            parent.push(ids.len() as u32 - 1);
-            ids.len() as u32 - 1
-        });
-        let ib = *lid.entry(b).or_insert_with(|| {
-            ids.push(b);
-            parent.push(ids.len() as u32 - 1);
-            ids.len() as u32 - 1
-        });
-        let (ra, rb) = (find(&mut parent, ia), find(&mut parent, ib));
-        if ra != rb {
-            parent[ra.max(rb) as usize] = ra.min(rb);
+    // Map events and clicks to persons (in parallel), then partition by person.
+    let person_of = |k: u128| -> (u128, bool, u32) {
+        match persons.of.get(&k) {
+            Some(&i) => (persons.pkey[i as usize], true, i),
+            None => (k, false, 0),
         }
-    }
-    let mut name: Vec<&[u8]> = vec![&[]; ids.len()];
-    let mut has_name = vec![false; ids.len()];
-    for i in 0..ids.len() as u32 {
-        let r = find(&mut parent, i) as usize;
-        if !has_name[r] || ids[i as usize] < name[r] {
-            name[r] = ids[i as usize];
-            has_name[r] = true;
-        }
-    }
-    let roots: Vec<u32> = (0..ids.len() as u32).map(|i| find(&mut parent, i)).collect();
-    lap("links");
-
-    // Persons with events.
-    let mut pmap: FxHashMap<&[u8], u32> = FxHashMap::default();
-    let mut pnames: Vec<&[u8]> = vec![];
-    // (pid, ts, typ, price, cat)
-    let mut pev: Vec<(u32, i64, u8, u32, u16)> = Vec::with_capacity(kept.len());
-    for e in &kept {
-        let pn: &[u8] = match lid.get(e.uid) {
-            Some(&i) => name[roots[i as usize] as usize],
-            None => e.uid,
-        };
-        let n = pnames.len() as u32;
-        let p = *pmap.entry(pn).or_insert_with(|| {
-            pnames.push(pn);
-            n
-        });
-        let cat = prod.get(e.pid).copied().unwrap_or(unknown);
-        pev.push((p, e.ts, e.typ, e.price, cat));
-    }
-    // (pid, ts, cid, camp)
-    let mut pck: Vec<(u32, i64, &[u8], u32)> = Vec::with_capacity(kclicks.len());
-    for c in &kclicks {
-        let pn: &[u8] = match lid.get(c.uid) {
-            Some(&i) => name[roots[i as usize] as usize],
-            None => c.uid,
-        };
-        if let Some(&p) = pmap.get(pn) {
-            pck.push((p, c.ts, c.cid, c.camp));
-        }
-    }
-    pev.par_sort_unstable_by_key(|x| (x.0, x.1));
-    pck.par_sort_unstable_by(|a, b| a.0.cmp(&b.0).then(a.1.cmp(&b.1)).then(a.2.cmp(b.2)));
+    };
+    let pev0: Vec<PEv> = kept
+        .par_iter()
+        .map(|&i| {
+            let e = &evs[i as usize];
+            let (pkey, linked, li) = person_of(e.ukey);
+            let name = if linked { persons.name[li as usize] } else { e.uid };
+            PEv { pkey, ts: e.ts, name, price: e.price, cat: e.cat, typ: e.typ }
+        })
+        .collect();
+    lap("  map-events");
+    let pck0: Vec<PCk> = kclicks
+        .par_iter()
+        .map(|&i| {
+            let c = &cks[i as usize];
+            PCk { pkey: person_of(c.ukey).0, ts: c.ts, cid: c.cid, camp: c.camp }
+        })
+        .collect();
+    lap("  map-clicks");
+    let ((mut pev, eoff), (mut pck, coff)) = rayon::join(
+        || part::scatter(&pev0, NB, |x| bucket(x.pkey)),
+        || part::scatter(&pck0, NB, |x| bucket(x.pkey)),
+    );
     lap("persons");
 
-    // Person ranges.
-    let mut ranges: Vec<(u32, usize, usize)> = vec![];
-    let mut i = 0;
-    while i < pev.len() {
-        let p = pev[i].0;
-        let mut j = i + 1;
-        while j < pev.len() && pev[j].0 == p {
-            j += 1;
-        }
-        ranges.push((p, i, j));
-        i = j;
-    }
-
+    // Each bucket holds whole persons: sort it and build its sessions.
     let ncat = cat_names.len();
-    let (urows, cagg) = ranges
-        .par_chunks(256)
-        .map(|rs| {
-            let mut urows: Vec<URow> = vec![];
-            let mut cagg: FxHashMap<(u32, i32), CAgg> = FxHashMap::default();
-            let mut catsum = vec![0i64; ncat];
-            let mut window: FxHashMap<u32, u32> = FxHashMap::default();
-            for &(p, a, b) in rs {
-                let ev = &pev[a..b];
-                let c0 = pck.partition_point(|x| x.0 < p);
-                let c1 = pck.partition_point(|x| x.0 <= p);
-                let ck = &pck[c0..c1];
-                window.clear();
-                let (mut lo, mut hi) = (0usize, 0usize);
-                // Current user-day accumulator.
-                let mut cur_day = i32::MIN;
-                let mut u = URow { pid: p, day: 0, sessions: 0, events: 0, revenue: 0, top: None };
-                let mut touched: Vec<u16> = vec![];
-                let flush = |u: &mut URow, catsum: &mut Vec<i64>, touched: &mut Vec<u16>, urows: &mut Vec<URow>| {
-                    if u.sessions == 0 {
-                        return;
-                    }
-                    let mut best: Option<u16> = None;
-                    for &c in touched.iter() {
-                        let s = catsum[c as usize];
-                        best = match best {
-                            None => Some(c),
-                            Some(bc) => {
-                                let bs = catsum[bc as usize];
-                                if s > bs || (s == bs && cat_rank[c as usize] < cat_rank[bc as usize]) {
-                                    Some(c)
-                                } else {
-                                    Some(bc)
-                                }
-                            }
-                        };
-                    }
-                    for &c in touched.iter() {
-                        catsum[c as usize] = 0;
-                    }
-                    touched.clear();
-                    urows.push(URow { top: best, ..*u });
-                };
-                let mut s = 0;
-                while s < ev.len() {
-                    let start = ev[s].1;
-                    let mut e = s + 1;
-                    while e < ev.len() && ev[e].1 - ev[e - 1].1 <= SESSION_GAP {
-                        e += 1;
-                    }
-                    let sess = &ev[s..e];
-                    let day = start.div_euclid(MS_DAY) as i32;
-                    let mut rev = 0i64;
-                    let mut purch = false;
-                    if day != cur_day {
-                        flush(&mut u, &mut catsum, &mut touched, &mut urows);
-                        u = URow { pid: p, day, sessions: 0, events: 0, revenue: 0, top: None };
-                        cur_day = day;
-                    }
-                    for x in sess {
-                        if x.2 == T_PURCHASE {
-                            purch = true;
-                            rev += x.3 as i64;
-                            if catsum[x.4 as usize] == 0 {
-                                touched.push(x.4);
-                            }
-                            catsum[x.4 as usize] += x.3 as i64;
-                        }
-                    }
-                    u.sessions += 1;
-                    u.events += sess.len() as i64;
-                    u.revenue += rev;
-
-                    // Click window [start - 7d, start].
-                    while hi < ck.len() && ck[hi].1 <= start {
-                        *window.entry(ck[hi].3).or_insert(0) += 1;
-                        hi += 1;
-                    }
-                    while lo < hi && ck[lo].1 < start - WEEK {
-                        let w = window.get_mut(&ck[lo].3).unwrap();
-                        *w -= 1;
-                        if *w == 0 {
-                            window.remove(&ck[lo].3);
-                        }
-                        lo += 1;
-                    }
-                    let credited = if hi > lo {
-                        let mt = ck[hi - 1].1;
-                        let mut k = hi - 1;
-                        while k > lo && ck[k - 1].1 == mt {
-                            k -= 1;
-                        }
-                        ck[k].3
-                    } else {
-                        ORGANIC
-                    };
-                    let a = cagg.entry((credited, day)).or_default();
-                    a.sessions += 1;
-                    a.purchasing += purch as i64;
-                    a.revenue += rev;
-                    for &camp in window.keys() {
-                        cagg.entry((camp, day)).or_default().assisted += 1;
-                    }
-                    s = e;
-                }
-                flush(&mut u, &mut catsum, &mut touched, &mut urows);
-            }
-            (urows, cagg)
+    let eb = split_mut(&mut pev, &eoff);
+    let cb = split_mut(&mut pck, &coff);
+    let (urows, cagg) = eb
+        .into_par_iter()
+        .zip(cb.into_par_iter())
+        .map(|(e, c)| {
+            e.sort_unstable_by(|a, b| a.pkey.cmp(&b.pkey).then(a.ts.cmp(&b.ts)));
+            c.sort_unstable_by(|a, b| a.pkey.cmp(&b.pkey).then(a.ts.cmp(&b.ts)).then(a.cid.cmp(b.cid)));
+            process(e, c, &cat_rank, ncat)
         })
         .reduce(
             || (vec![], FxHashMap::default()),
@@ -549,7 +649,7 @@ fn main() {
 
     // Output.
     let ur = out::UserRows {
-        user_id: urows.iter().map(|r| ByteArray::from(pnames[r.pid as usize].to_vec())).collect(),
+        user_id: urows.iter().map(|r| ByteArray::from(r.name.to_vec())).collect(),
         day: urows.iter().map(|r| r.day).collect(),
         sessions: urows.iter().map(|r| r.sessions).collect(),
         events: urows.iter().map(|r| r.events).collect(),
@@ -574,8 +674,10 @@ fn main() {
         revenue: ck_rows.iter().map(|x| x.1.revenue).collect(),
         assisted: ck_rows.iter().map(|x| x.1.assisted).collect(),
     };
-    out::write_user(&outd.join("user_daily"), &ur).expect("write user_daily");
-    out::write_camp(&outd.join("campaign_daily"), &cr).expect("write campaign_daily");
+    rayon::join(
+        || out::write_user(&outd.join("user_daily"), &ur).expect("write user_daily"),
+        || out::write_camp(&outd.join("campaign_daily"), &cr).expect("write campaign_daily"),
+    );
     lap("write");
 
     // Self-check from the rules.

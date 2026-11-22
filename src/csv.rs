@@ -77,3 +77,88 @@ mod tests {
         assert_eq!(data_lines(b"h").count(), 0);
     }
 }
+
+/// Fast line scanner over a chunk (lines separated by `\n`, no header).
+/// One SIMD pass finds commas, quotes and newlines. Lines with a quote go
+/// through the exact `fields` parser; others are split at the commas found.
+pub struct Lines<'a> {
+    buf: &'a [u8],
+    it: memchr::Memchr3<'a>,
+    start: usize,
+    done: bool,
+}
+
+impl<'a> Lines<'a> {
+    pub fn new(buf: &'a [u8]) -> Self {
+        Lines { buf, it: memchr::memchr3_iter(b',', b'"', b'\n', buf), start: 0, done: buf.is_empty() }
+    }
+
+    /// Next line split into `N` fields; `Some(None)` for a malformed line.
+    #[inline]
+    pub fn next_fields<const N: usize>(&mut self) -> Option<Option<[&'a [u8]; N]>> {
+        if self.done {
+            return None;
+        }
+        let mut cut = [0usize; N];
+        let mut commas = 0usize;
+        let mut quoted = false;
+        let end;
+        loop {
+            match self.it.next() {
+                Some(p) => match self.buf[p] {
+                    b',' => {
+                        if commas < N - 1 {
+                            cut[commas] = p;
+                        }
+                        commas += 1;
+                    }
+                    b'"' => quoted = true,
+                    _ => {
+                        end = p;
+                        break;
+                    }
+                },
+                None => {
+                    end = self.buf.len();
+                    self.done = true;
+                    break;
+                }
+            }
+        }
+        let s = self.start;
+        self.start = end + 1;
+        let line = &self.buf[s..end];
+        if quoted {
+            return Some(fields::<N>(line));
+        }
+        if commas != N - 1 {
+            return Some(None);
+        }
+        let mut out: [&[u8]; N] = [&[]; N];
+        let mut a = s;
+        for i in 0..N - 1 {
+            out[i] = &self.buf[a..cut[i]];
+            a = cut[i] + 1;
+        }
+        out[N - 1] = &self.buf[a..end];
+        Some(Some(out))
+    }
+}
+
+#[cfg(test)]
+mod scan_tests {
+    use super::*;
+    #[test]
+    fn same_as_exact() {
+        let body = b"a,b\n\"x\",y\nbad\n\nq\"r,s\n,\n\"\",\"\"\nlast,one";
+        let mut l = Lines::new(body);
+        let mut got = vec![];
+        while let Some(f) = l.next_fields::<2>() {
+            got.push(f);
+        }
+        let want: Vec<_> = body.split(|&c| c == b'\n').map(fields::<2>).collect();
+        assert_eq!(got, want);
+        let mut l = Lines::new(b"");
+        assert!(l.next_fields::<2>().is_none());
+    }
+}
