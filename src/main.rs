@@ -4,8 +4,8 @@
 mod alloc;
 mod csv;
 mod key;
-mod part;
 mod out;
+mod ptab;
 mod ts;
 
 use memmap2::Mmap;
@@ -48,7 +48,7 @@ fn csv_files(dir: &Path) -> Vec<PathBuf> {
 /// Memory-maps every file; empty files are skipped (they hold no rows).
 fn map_all(files: &[PathBuf]) -> Vec<Mmap> {
     files
-        .iter()
+        .par_iter()
         .filter_map(|p| {
             let f = File::open(p).ok()?;
             if f.metadata().ok()?.len() == 0 {
@@ -129,6 +129,13 @@ impl From<u128> for K {
     }
 }
 
+impl From<K> for u128 {
+    #[inline]
+    fn from(k: K) -> u128 {
+        ((k.0 as u128) << 64) | k.1 as u128
+    }
+}
+
 /// Frees record vectors on a background thread so the unmap cost overlaps
 /// the next stage instead of stalling it. `T: Copy` has no destructor, so
 /// releasing the raw allocations is all a drop would do.
@@ -149,14 +156,17 @@ fn free_bg<T: Copy>(vs: Vec<Vec<T>>) {
     });
 }
 
-/// One event line (56 bytes). `key` is the key of `event_id`. The person is
-/// resolved only for the copy that survives dedup, not for every line.
+/// One event line (72 bytes). `key` is the key of `event_id`. The person
+/// is resolved while parsing, when the user ID is still in cache: resolving
+/// it after the dedup sort means a cache and TLB miss into the mapped file
+/// for every event.
 #[derive(Clone, Copy)]
 struct ERec<'a> {
     key: K,
     ingest: i64,
     ts: i64,
-    uid: &'a [u8],
+    pkey: K,
+    name: &'a [u8],
     price: u32,
     cat: u16,
     typ: u8,
@@ -212,13 +222,49 @@ fn parse_price(b: &[u8]) -> Option<u32> {
     }
 }
 
-/// The person of a user ID: (person key, person name).
-#[inline]
-fn person<'a>(persons: &Persons<'a>, uid: &'a [u8]) -> (u128, &'a [u8]) {
-    let k = key::k128(uid);
-    match persons.of.get(&k) {
-        Some(&i) => (persons.pkey[i as usize], persons.name[i as usize]),
-        None => (k, uid),
+#[inline(always)]
+fn prefetch<T>(r: &T) {
+    #[cfg(target_arch = "x86_64")]
+    unsafe {
+        use std::arch::x86_64::{_mm_prefetch, _MM_HINT_T0};
+        _mm_prefetch(r as *const T as *const i8, _MM_HINT_T0);
+    }
+}
+
+/// Resolves persons for a parsed chunk. Each valid record arrives holding
+/// its user ID's key (and the ID as its name); a linked ID is replaced by
+/// its person's key and name. An unlinked ID is its own person, so it keeps
+/// both. Two passes, each prefetching D records ahead, so the random reads
+/// into the person table overlap instead of stalling one at a time.
+fn resolve<'a, T>(
+    v: &mut [T],
+    p: &Persons<'a>,
+    ok: impl Fn(&T) -> bool,
+    uk: impl Fn(&T) -> K,
+    set: impl Fn(&mut T, K, &'a [u8]),
+) {
+    const D: usize = 16;
+    const NONE: u32 = u32::MAX;
+    let n = v.len();
+    let mut ix = vec![NONE; n];
+    for i in 0..n {
+        if i + D < n && ok(&v[i + D]) {
+            p.tab.prefetch(uk(&v[i + D]).into());
+        }
+        if ok(&v[i]) {
+            if let Some(j) = p.tab.get(uk(&v[i]).into()) {
+                ix[i] = j;
+            }
+        }
+    }
+    for i in 0..n {
+        if i + D < n && ix[i + D] != NONE {
+            prefetch(&p.res[ix[i + D] as usize]);
+        }
+        if ix[i] != NONE {
+            let (k, name) = p.res[ix[i] as usize];
+            set(&mut v[i], k, name);
+        }
     }
 }
 
@@ -259,10 +305,18 @@ fn parse_events<'a>(chunk: &'a [u8], cx: &Ctx<'a, '_>) -> Vec<ERec<'a>> {
             && !f[5].is_empty()
             && price.is_some()
             && ingest.saturating_sub(tsv) <= LATE;
-        let cat = if ok { cx.prod.get(f[5]).copied().unwrap_or(cx.unknown) } else { 0 };
+        let (pkey, name, cat) = if ok {
+            (key::k128(f[1]).into(), f[1], cx.prod.get(f[5]).copied().unwrap_or(cx.unknown))
+        } else {
+            (K::default(), &f[1][..0], 0)
+        };
         let key = if *X_NOKEY { f[0].len() as u128 } else { key::k128(f[0]) };
-        v.push(ERec { key: key.into(), ingest, ts: tsv, uid: f[1], price: price.unwrap_or(0), cat, typ, ok });
+        v.push(ERec { key: key.into(), ingest, ts: tsv, pkey, name, price: price.unwrap_or(0), cat, typ, ok });
     }
+    resolve(&mut v, cx.persons, |e| e.ok, |e| e.pkey, |e, k, name| {
+        e.pkey = k;
+        e.name = name;
+    });
     v
 }
 
@@ -279,9 +333,10 @@ fn parse_clicks<'a>(chunk: &'a [u8], cx: &Ctx<'a, '_>) -> Vec<CRec<'a>> {
         let tsv = t.unwrap_or(i64::MIN);
         let camp = cx.camps.get(f[2]).copied();
         let ok = !f[1].is_empty() && t.is_some() && lo <= tsv && tsv < cx.we && camp.is_some();
-        let pkey = if ok { person(cx.persons, f[1]).0 } else { 0 };
+        let pkey = if ok { key::k128(f[1]) } else { 0 };
         v.push(CRec { key: key::k128(f[0]).into(), pkey: pkey.into(), ts: tsv, cid: f[0], camp: camp.unwrap_or(0), ok });
     }
+    resolve(&mut v, cx.persons, |c| c.ok, |c| c.pkey, |c, k, _| c.pkey = k);
     v
 }
 
@@ -313,11 +368,11 @@ fn find(p: &mut [u32], mut x: u32) -> u32 {
     r
 }
 
-/// Linked IDs: key of each linked ID -> (person key, person name).
+/// Linked IDs: `tab` maps a linked ID's key to an index into `res`, which
+/// holds that ID's (person key, person name).
 struct Persons<'a> {
-    of: FxHashMap<u128, u32>,
-    pkey: Vec<u128>,
-    name: Vec<&'a [u8]>,
+    tab: ptab::PTab,
+    res: Vec<(K, &'a [u8])>,
 }
 
 fn build_persons<'a>(links: &[(&'a [u8], &'a [u8])]) -> Persons<'a> {
@@ -351,105 +406,106 @@ fn build_persons<'a>(links: &[(&'a [u8], &'a [u8])]) -> Persons<'a> {
         }
     }
     let rkey: Vec<u128> = cname.par_iter().map(|c| c.map_or(0, key::k128)).collect();
-    let name: Vec<&[u8]> = (0..n).map(|i| cname[root[i] as usize].unwrap()).collect();
-    let pkey: Vec<u128> = (0..n).map(|i| rkey[root[i] as usize]).collect();
-    Persons { of, pkey, name }
+    let res: Vec<(K, &[u8])> = (0..n).map(|i| (rkey[root[i] as usize].into(), cname[root[i] as usize].unwrap())).collect();
+    let entries: Vec<(u128, u32)> = of.into_iter().collect();
+    Persons { tab: ptab::PTab::new(&entries), res }
 }
 
 // ---------------------------------------------------------------- partitioning
+//
+// No global scatter. Each parse chunk groups its own records by key into
+// NG groups while they are still in cache; a dedup task then gathers its
+// group's run from every chunk (sequential copies), dedups it in cache, and
+// regroups the survivors by person. Session tasks gather person groups the
+// same way. Nothing ever writes randomly into a gigabyte-sized array.
 
-const NB: usize = 1 << 12;
+/// Number of groups; also the number of dedup and session tasks.
+const NG: usize = 256;
 
 #[inline]
-fn bucket(k: K) -> usize {
-    (k.0 >> (64 - 12)) as usize
+fn group(k: K) -> usize {
+    (k.0 >> 56) as usize
 }
 
-fn split_mut<'s, T>(v: &'s mut [T], off: &[usize]) -> Vec<&'s mut [T]> {
-    let mut out = Vec::with_capacity(off.len() - 1);
-    let mut rest = v;
-    for w in off.windows(2) {
-        let (a, b) = rest.split_at_mut(w[1] - w[0]);
-        out.push(a);
-        rest = b;
+/// Records grouped by `group`: group `g` is `v[off[g]..off[g + 1]]`.
+struct Grouped<T> {
+    v: Vec<T>,
+    off: Box<[u32; NG + 1]>,
+}
+
+impl<T> Grouped<T> {
+    #[inline]
+    fn run(&self, g: usize) -> &[T] {
+        &self.v[self.off[g] as usize..self.off[g + 1] as usize]
     }
-    out
 }
 
-/// Buckets per dedup task: each task turns a run of id-buckets into one
-/// vector of survivors, so the next scatter has few input pieces.
-const GROUP: usize = 64;
+/// Counting sort of one chunk's records into NG groups (stable).
+fn group_local<T: Copy>(v: &[T], key: impl Fn(&T) -> K) -> Grouped<T> {
+    let mut off = Box::new([0u32; NG + 1]);
+    for x in v {
+        off[group(key(x)) + 1] += 1;
+    }
+    for g in 0..NG {
+        off[g + 1] += off[g];
+    }
+    let mut pos: [u32; NG] = off[..NG].try_into().unwrap();
+    let mut out: Vec<T> = Vec::with_capacity(v.len());
+    let dst = out.as_mut_ptr();
+    for x in v {
+        let g = group(key(x));
+        // SAFETY: pos[g] stays within group g's range, which is < v.len().
+        unsafe { dst.add(pos[g] as usize).write(*x) };
+        pos[g] += 1;
+    }
+    // SAFETY: every slot 0..v.len() was written exactly once.
+    unsafe { out.set_len(v.len()) };
+    Grouped { v: out, off }
+}
 
-/// Events: scatter by event_id key, keep the smallest ingest_ts copy of each
-/// key if it is valid. Returns survivors as pieces for the person scatter.
-fn dedup_events<'a>(parts: Vec<Vec<ERec<'a>>>, persons: &Persons<'a>) -> Vec<Vec<PEv<'a>>> {
-    let (mut v, off) = {
-        let pieces: Vec<&[ERec]> = parts.iter().map(|p| &p[..]).collect();
-        part::scatter_pieces(&pieces, NB, |x| bucket(x.key))
-    };
-    free_bg(parts);
-    let bs = split_mut(&mut v, &off);
-    let mut groups: Vec<Vec<&mut [ERec]>> = vec![];
-    let mut it = bs.into_iter();
-    loop {
-        let g: Vec<&mut [ERec]> = it.by_ref().take(GROUP).collect();
-        if g.is_empty() {
-            break;
+/// Concatenates group `g` from every part.
+fn gather<T: Copy>(parts: &[Grouped<T>], g: usize) -> Vec<T> {
+    let n: usize = parts.iter().map(|p| p.run(g).len()).sum();
+    let mut v = Vec::with_capacity(n);
+    for p in parts {
+        v.extend_from_slice(p.run(g));
+    }
+    v
+}
+
+/// Frees grouped parts on a background thread (see `free_bg`).
+fn free_grouped_bg<T: Copy>(parts: Vec<Grouped<T>>) {
+    free_bg(parts.into_iter().map(|p| p.v).collect());
+}
+
+/// Events of key group `g`: keep the smallest-ingest_ts copy of each
+/// event_id if it is valid, regroup by person.
+fn dedup_events<'a>(parts: &[Grouped<ERec<'a>>], g: usize) -> Grouped<PEv<'a>> {
+    let mut b = gather(parts, g);
+    b.sort_unstable_by(|x, y| x.key.cmp(&y.key).then(x.ingest.cmp(&y.ingest)));
+    let mut out = Vec::with_capacity(b.len());
+    for i in 0..b.len() {
+        let e = &b[i];
+        if (i == 0 || b[i - 1].key != e.key) && e.ok {
+            out.push(PEv { pkey: e.pkey, ts: e.ts, name: e.name, price: e.price, cat: e.cat, typ: e.typ });
         }
-        groups.push(g);
     }
-    groups
-        .into_par_iter()
-        .map(|g| {
-            let mut out = Vec::with_capacity(g.iter().map(|b| b.len()).sum());
-            for b in g {
-                b.sort_unstable_by(|x, y| x.key.cmp(&y.key).then(x.ingest.cmp(&y.ingest)));
-                for i in 0..b.len() {
-                    let e = &b[i];
-                    if (i == 0 || b[i - 1].key != e.key) && e.ok {
-                        let (pk, name) = person(persons, e.uid);
-                        out.push(PEv { pkey: pk.into(), ts: e.ts, name, price: e.price, cat: e.cat, typ: e.typ });
-                    }
-                }
-            }
-            out
-        })
-        .collect()
+    group_local(&out, |x| x.pkey)
 }
 
-/// Clicks: copies are identical, keep one per click_id if valid.
-fn dedup_clicks<'a>(parts: Vec<Vec<CRec<'a>>>) -> Vec<Vec<PCk<'a>>> {
-    let (mut v, off) = {
-        let pieces: Vec<&[CRec]> = parts.iter().map(|p| &p[..]).collect();
-        part::scatter_pieces(&pieces, NB, |x| bucket(x.key))
-    };
-    free_bg(parts);
-    let bs = split_mut(&mut v, &off);
-    let mut groups: Vec<Vec<&mut [CRec]>> = vec![];
-    let mut it = bs.into_iter();
-    loop {
-        let g: Vec<&mut [CRec]> = it.by_ref().take(GROUP).collect();
-        if g.is_empty() {
-            break;
+/// Clicks of key group `g`: copies are identical, keep one per click_id if
+/// valid, regroup by person.
+fn dedup_clicks<'a>(parts: &[Grouped<CRec<'a>>], g: usize) -> Grouped<PCk<'a>> {
+    let mut b = gather(parts, g);
+    b.sort_unstable_by(|x, y| x.key.cmp(&y.key));
+    let mut out = Vec::with_capacity(b.len());
+    for i in 0..b.len() {
+        let c = &b[i];
+        if (i == 0 || b[i - 1].key != c.key) && c.ok {
+            out.push(PCk { pkey: c.pkey, ts: c.ts, cid: c.cid, camp: c.camp });
         }
-        groups.push(g);
     }
-    groups
-        .into_par_iter()
-        .map(|g| {
-            let mut out = Vec::with_capacity(g.iter().map(|b| b.len()).sum());
-            for b in g {
-                b.sort_unstable_by(|x, y| x.key.cmp(&y.key));
-                for i in 0..b.len() {
-                    let c = &b[i];
-                    if (i == 0 || b[i - 1].key != c.key) && c.ok {
-                        out.push(PCk { pkey: c.pkey, ts: c.ts, cid: c.cid, camp: c.camp });
-                    }
-                }
-            }
-            out
-        })
-        .collect()
+    group_local(&out, |x| x.pkey)
 }
 
 /// Sessions, credit and assists for a run of persons. Both slices are sorted
@@ -654,43 +710,33 @@ fn main() {
     let ev_chunks = chunks(&ev_maps);
     let ck_chunks = chunks(&ck_maps);
     let cx = Ctx { ws, we, prod: &prod, unknown, camps: &camps, persons: &persons };
-    let (ev_parts, ck_parts): (Vec<Vec<ERec>>, Vec<Vec<CRec>>) = rayon::join(
-        || ev_chunks.par_iter().map(|c| parse_events(c, &cx)).collect(),
-        || ck_chunks.par_iter().map(|c| parse_clicks(c, &cx)).collect(),
+    let (ev_parts, ck_parts): (Vec<Grouped<ERec>>, Vec<Grouped<CRec>>) = rayon::join(
+        || ev_chunks.par_iter().map(|c| group_local(&parse_events(c, &cx), |x| x.key)).collect(),
+        || ck_chunks.par_iter().map(|c| group_local(&parse_clicks(c, &cx), |x| x.key)).collect(),
     );
     lap("parse");
 
-    let n_ev_rows: usize = ev_parts.iter().map(|p| p.len()).sum();
-    let pr = &persons;
-    let (ev_surv, ck_surv) = rayon::join(move || dedup_events(ev_parts, pr), move || dedup_clicks(ck_parts));
-    let n_kept: usize = ev_surv.iter().map(|p| p.len()).sum();
-    let n_kclicks: usize = ck_surv.iter().map(|p| p.len()).sum();
+    let n_ev_rows: usize = ev_parts.iter().map(|p| p.v.len()).sum();
+    let (ev_d, ck_d): (Vec<Grouped<PEv>>, Vec<Grouped<PCk>>) = rayon::join(
+        || (0..NG).into_par_iter().map(|g| dedup_events(&ev_parts, g)).collect(),
+        || (0..NG).into_par_iter().map(|g| dedup_clicks(&ck_parts, g)).collect(),
+    );
+    free_grouped_bg(ev_parts);
+    free_grouped_bg(ck_parts);
+    let n_kept: usize = ev_d.iter().map(|p| p.v.len()).sum();
+    let n_kclicks: usize = ck_d.iter().map(|p| p.v.len()).sum();
     lap("dedup");
 
-    let ((mut pev, eoff), (mut pck, coff)) = {
-        let ev_pieces: Vec<&[PEv]> = ev_surv.iter().map(|p| &p[..]).collect();
-        let ck_pieces: Vec<&[PCk]> = ck_surv.iter().map(|p| &p[..]).collect();
-        rayon::join(
-            || part::scatter_pieces(&ev_pieces, NB, |x| bucket(x.pkey)),
-            || part::scatter_pieces(&ck_pieces, NB, |x| bucket(x.pkey)),
-        )
-    };
-    free_bg(ev_surv);
-    free_bg(ck_surv);
-    lap("persons");
-
-
-    // Each bucket holds whole persons: sort it and build its sessions.
+    // Each person group holds whole persons: gather, sort, build sessions.
     let ncat = cat_names.len();
-    let eb = split_mut(&mut pev, &eoff);
-    let cb = split_mut(&mut pck, &coff);
-    let (urows, cagg) = eb
+    let (urows, cagg) = (0..NG)
         .into_par_iter()
-        .zip(cb.into_par_iter())
-        .map(|(e, c)| {
+        .map(|h| {
+            let mut e = gather(&ev_d, h);
+            let mut c = gather(&ck_d, h);
             e.sort_unstable_by(|a, b| a.pkey.cmp(&b.pkey).then(a.ts.cmp(&b.ts)));
             c.sort_unstable_by(|a, b| a.pkey.cmp(&b.pkey).then(a.ts.cmp(&b.ts)).then(a.cid.cmp(b.cid)));
-            process(e, c, &cat_rank, ncat)
+            process(&e, &c, &cat_rank, ncat)
         })
         .reduce(
             || (vec![], FxHashMap::default()),
