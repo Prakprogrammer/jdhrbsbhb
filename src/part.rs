@@ -81,3 +81,51 @@ mod tests {
         assert_eq!(a, c);
     }
 }
+
+/// Like `scatter`, but over several input pieces (for example one vector per
+/// parse chunk), avoiding a concatenation first.
+pub fn scatter_pieces<T, F>(pieces: &[&[T]], nb: usize, bucket: F) -> (Vec<T>, Vec<usize>)
+where
+    T: Copy + Send + Sync,
+    F: Fn(&T) -> usize + Sync,
+{
+    let n: usize = pieces.iter().map(|p| p.len()).sum();
+    let counts: Vec<Vec<u32>> = pieces
+        .par_iter()
+        .map(|c| {
+            let mut k = vec![0u32; nb];
+            for x in c.iter() {
+                k[bucket(x)] += 1;
+            }
+            k
+        })
+        .collect();
+    let mut pos: Vec<Vec<usize>> = vec![vec![0; nb]; counts.len()];
+    let mut off = vec![0usize; nb + 1];
+    let mut run = 0usize;
+    for b in 0..nb {
+        off[b] = run;
+        for (c, k) in counts.iter().enumerate() {
+            pos[c][b] = run;
+            run += k[b] as usize;
+        }
+    }
+    off[nb] = run;
+    let mut out: Vec<MaybeUninit<T>> = Vec::with_capacity(n);
+    unsafe { out.set_len(n) };
+    let base = SendPtr(out.as_mut_ptr());
+    pieces.par_iter().zip(pos.into_par_iter()).for_each(|(c, mut p)| {
+        let base = &base;
+        for x in c.iter() {
+            let b = bucket(x);
+            // SAFETY: disjoint ranges per piece and bucket, see `scatter`.
+            unsafe { (*base.0.add(p[b])).write(*x) };
+            p[b] += 1;
+        }
+    });
+    let out = unsafe {
+        let mut out = std::mem::ManuallyDrop::new(out);
+        Vec::from_raw_parts(out.as_mut_ptr() as *mut T, n, out.capacity())
+    };
+    (out, off)
+}
