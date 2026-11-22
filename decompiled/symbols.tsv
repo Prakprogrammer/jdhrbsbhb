@@ -1,0 +1,646 @@
+00000000005d2080	<core::result::Result<alloc::string::String, std::env::VarError>>::map_or::<bool, pipeline::main::{closure#33}>
+00000000005d2220	<std::sync::once_lock::OnceLock<alloc::vec::Vec<core::sync::atomic::Atomic<bool>>>>::initialize::<<std::sync::once_lock::OnceLock<alloc::vec::Vec<core::sync::atomic::Atomic<bool>>>>::get_or_init<pipeline::parse::fr_done::{closure#0}>::{closure#0}, !>
+00000000005d2280	<std::sync::once_lock::OnceLock<alloc::vec::Vec<usize>>>::initialize::<<std::sync::once_lock::OnceLock<alloc::vec::Vec<usize>>>::get_or_init<pipeline::parse::cpu_order::{closure#0}>::{closure#0}, !>
+00000000005d22e0	<std::sync::once_lock::OnceLock<pipeline::out::S3Ctx>>::initialize::<<std::sync::once_lock::OnceLock<pipeline::out::S3Ctx>>::get_or_init<<std::sync::once_lock::OnceLock<pipeline::out::S3Ctx>>::try_insert::{closure#0}>::{closure#0}, !>
+00000000005d2340	<std::sync::once_lock::OnceLock<pipeline::parse::Drv>>::initialize::<<std::sync::once_lock::OnceLock<pipeline::parse::Drv>>::get_or_init<pipeline::parse::drv::{closure#0}>::{closure#0}, !>
+00000000005d23a0	<std::sync::once_lock::OnceLock<pipeline::parse::Tabs>>::initialize::<<std::sync::once_lock::OnceLock<pipeline::parse::Tabs>>::get_or_init<<std::sync::once_lock::OnceLock<pipeline::parse::Tabs>>::try_insert::{closure#0}>::{closure#0}, !>
+00000000005d2400	<std::sync::once_lock::OnceLock<pipeline::parse::Tabs>>::initialize::<<std::sync::once_lock::OnceLock<pipeline::parse::Tabs>>::get_or_init<pipeline::parse::tabs::{closure#0}>::{closure#0}, !>
+00000000005d2460	<std::sync::once_lock::OnceLock<(alloc::vec::Vec<pipeline::Chunk>, usize)>>::initialize::<<std::sync::once_lock::OnceLock<(alloc::vec::Vec<pipeline::Chunk>, usize)>>::get_or_init<pipeline::parse::work_queue::{closure#0}>::{closure#0}, !>
+00000000005d24c0	<std::sync::once_lock::OnceLock<bool>>::initialize::<<std::sync::once_lock::OnceLock<bool>>::get_or_init<pipeline::parse::popw::{closure#0}>::{closure#0}, !>
+00000000005d2520	<std::sync::once_lock::OnceLock<usize>>::initialize::<<std::sync::once_lock::OnceLock<usize>>::get_or_init<pipeline::parse::fr_k::{closure#0}>::{closure#0}, !>
+00000000005d2580	<std::sync::once_lock::OnceLock<usize>>::initialize::<<std::sync::once_lock::OnceLock<usize>>::get_or_init<pipeline::parse::fr_lag::{closure#0}>::{closure#0}, !>
+00000000005d25e0	<std::sys::thread_local::native::lazy::Storage<[i32; 3], !>>::get_or_init_slow::<pipeline::v3b::pm3::FD::__rust_std_internal_init_fn>
+00000000005d2740	<std::sys::thread_local::native::lazy::Storage<core::cell::RefCell<pipeline::out::Split>, ()>>::get_or_init_slow::<pipeline::out::SPLIT::__rust_std_internal_init_fn>
+00000000005d2800	<std::sys::thread_local::native::lazy::Storage<i32, !>>::get_or_init_slow::<pipeline::v3b::pkpm::FD::__rust_std_internal_init_fn>
+00000000005d2980	<hashbrown::map::HashMap<&[u8], u32, core::hash::BuildHasherDefault<pipeline::generic::util::H>>>::get::<[u8]>
+00000000005d2aa0	<std::thread::local::LocalKey<core::cell::UnsafeCell<pipeline::sys::Tl>>>::with::<<pipeline::sys::Alloc>::get::{closure#0}, usize>
+00000000005d2fa0	<hashbrown::raw::RawTable<(alloc::vec::Vec<u8>, pipeline::OddEv)>>::reserve_rehash::<hashbrown::map::make_hasher<alloc::vec::Vec<u8>, pipeline::OddEv, std::hash::random::RandomState>::{closure#0}>
+00000000005d3d00	<hashbrown::raw::RawTable<(&[u8], u32)>>::reserve_rehash::<hashbrown::map::make_hasher<&[u8], u32, core::hash::BuildHasherDefault<pipeline::generic::util::H>>::{closure#0}>
+00000000005d49a0	<hashbrown::raw::RawTable<(u64, [u64; 4])>>::reserve_rehash::<hashbrown::map::make_hasher<u64, [u64; 4], core::hash::BuildHasherDefault<pipeline::generic::util::H>>::{closure#0}>
+00000000005d5b20	pipeline::pqw::emit_dict_t::<u32>
+00000000005db860	pipeline::pqw::emit_packed::<pipeline::pqw::emit_dict_t<u8>::{closure#1}>
+00000000005dfdc0	pipeline::pqw::emit_packed::<pipeline::pqw::emit_dict_t<u16>::{closure#1}>
+00000000005e45e0	pipeline::pqw::pack_any::<pipeline::pqw::emit_packed<pipeline::pqw::emit_chunk::{closure#2}>::{closure#0}>
+00000000005e8000	pipeline::sys::run_par::<pipeline::main::{closure#30}>
+00000000005e8820	pipeline::v3b::credit_mask::<1>
+00000000005e90e0	pipeline::v3b::credit_mask::<2>
+00000000005e99e0	pipeline::v3b::credit_mask::<4>
+00000000005ea3e0	pipeline::v3b::credit_mask::<8>
+00000000005eaf80	pipeline::v3b::tie_camp::<core::slice::iter::Iter<[u64; 2]>>
+00000000005eb0a0	pipeline::v3b::tie_camp::<core::iter::adapters::map::Map<core::slice::iter::Iter<u32>, pipeline::v3b::credit_sorted::{closure#2}>>
+00000000005eb200	pipeline::links::sort_net::<16>
+00000000005ebaa0	pipeline::links::sort_net::<4>
+00000000005ec5a0	pipeline::links::sort_net::<8>
+00000000005ed340	pipeline::k_free::run_clicks::<pipeline::v3b::Sink, 0>
+00000000005edfa0	pipeline::k_free::run_clicks::<pipeline::parse::Ctx, 0>
+00000000005eec20	pipeline::k_free::run_events::<pipeline::v3b::Sink, 0>
+00000000005efb80	pipeline::k_free::run_events::<pipeline::parse::Ctx, 0>
+00000000005f0ae0	pipeline::k_free::scan_click::<pipeline::v3b::Sink>
+00000000005f0b40	pipeline::k_free::scan_click::<pipeline::parse::Ctx>
+00000000005f0ba0	pipeline::k_free::scan_event::<pipeline::v3b::Sink>
+00000000005f0c00	pipeline::k_free::scan_event::<pipeline::parse::Ctx>
+00000000005f0c60	pipeline::k_free::cl_lf::<pipeline::v3b::Sink>
+00000000005f1380	pipeline::k_free::cl_lf::<pipeline::parse::Ctx>
+00000000005f1aa0	pipeline::k_free::ev_lf::<pipeline::v3b::Sink>
+00000000005f2360	pipeline::k_free::ev_lf::<pipeline::parse::Ctx>
+00000000005f2c10	pipeline::k_free::cl_fix::<pipeline::v3b::Sink>
+00000000005f2c70	pipeline::k_free::ev_fix::<pipeline::v3b::Sink>
+00000000005f2cc0	pipeline::k_free::cl_cold::<pipeline::v3b::Sink>
+00000000005f3320	pipeline::k_free::cl_cold::<pipeline::parse::Ctx>
+00000000005f3960	pipeline::k_free::cl_long::<pipeline::v3b::Sink>
+00000000005f4280	pipeline::k_free::cl_long::<pipeline::parse::Ctx>
+00000000005f4ba0	pipeline::k_free::ev_cold::<pipeline::v3b::Sink>
+00000000005f56e0	pipeline::k_free::ev_cold::<pipeline::parse::Ctx>
+00000000005f6200	pipeline::k_free::ev_long::<pipeline::v3b::Sink>
+00000000005f70c0	pipeline::k_free::ev_long::<pipeline::parse::Ctx>
+00000000005f7f80	pipeline::k_free::ev_loop::<pipeline::v3b::Sink>
+00000000005fad60	pipeline::k_free::ev_loop::<pipeline::parse::Ctx>
+00000000005fdb40	pipeline::k_free::ev_redo::<pipeline::v3b::Sink>
+00000000005fdfc0	pipeline::k_free::ev_redo::<pipeline::parse::Ctx>
+00000000005fe440	pipeline::k_free::fix_slot::<pipeline::iface::CkBatch, pipeline::v3b::Sink>
+00000000005fe480	pipeline::k_free::flush_ck::<pipeline::v3b::Sink>
+00000000005fe4a0	pipeline::k_free::flush_ck::<pipeline::parse::Ctx>
+00000000005fe4c0	pipeline::k_free::flush_ev::<pipeline::v3b::Sink>
+00000000005fe4e0	pipeline::k_free::flush_ev::<pipeline::parse::Ctx>
+00000000005fe500	pipeline::k_free::link_slow::<pipeline::v3b::Sink>
+00000000005ff040	core::ptr::drop_glue::<core::cell::RefCell<pipeline::out::Split>>
+00000000005ff580	core::ptr::drop_glue::<core::option::Option<core::result::Result<pipeline::setup::Lookups, alloc::boxed::Box<dyn core::any::Any + core::marker::Send>>>>
+00000000005ff7e0	core::ptr::drop_glue::<core::option::Option<core::result::Result<(alloc::vec::Vec<(usize, alloc::vec::Vec<pipeline::generic::core::UserRow>)>, (pipeline::generic::core::Scratch, pipeline::generic::core::ShardBufs, std::collections::hash::map::HashMap<u64, [u64; 4], core::hash::BuildHasherDefault<pipeline::generic::util::H>>)), alloc::boxed::Box<dyn core::any::Any + core::marker::Send>>>>
+00000000005ff9a0	core::ptr::drop_glue::<core::option::Option<core::result::Result<(alloc::vec::Vec<(usize, pipeline::generic::P1)>, pipeline::generic::P1Bufs), alloc::boxed::Box<dyn core::any::Any + core::marker::Send>>>>
+00000000005ffa80	core::ptr::drop_glue::<core::option::Option<core::result::Result<(alloc::vec::Vec<(usize, pipeline::generic::P2)>, pipeline::generic::P2Bufs), alloc::boxed::Box<dyn core::any::Any + core::marker::Send>>>>
+00000000005ffb60	core::ptr::drop_glue::<core::option::Option<(core::ptr::non_null::NonNull<u8>, alloc::vec::Vec<pipeline::FileInfo>, alloc::vec::Vec<pipeline::Chunk>, [usize; 3], u64, u64)>>
+0000000000600000	core::ptr::drop_glue::<alloc::vec::Vec<alloc::vec::Vec<pipeline::Seg>>>
+00000000006001a0	core::ptr::drop_glue::<alloc::vec::Vec<alloc::vec::Vec<pipeline::generic::core::Ck0>>>
+0000000000600340	core::ptr::drop_glue::<alloc::vec::Vec<alloc::vec::Vec<pipeline::generic::core::UserRow>>>
+0000000000600ae0	core::ptr::drop_glue::<alloc::vec::Vec<pipeline::generic::core::Parts<pipeline::generic::core::Ck>>>
+0000000000600bc0	core::ptr::drop_glue::<alloc::vec::Vec<pipeline::generic::core::Parts<pipeline::generic::core::Ev>>>
+0000000000600ca0	core::ptr::drop_glue::<alloc::vec::Vec<pipeline::generic::core::Parts<pipeline::generic::core::Rec>>>
+0000000000600f20	core::ptr::drop_glue::<alloc::vec::Vec<pipeline::pqw::Plan>>
+0000000000601000	core::ptr::drop_glue::<alloc::vec::Vec<pipeline::setup::LFile>>
+00000000006011a0	core::ptr::drop_glue::<alloc::vec::Vec<pipeline::generic::P1Bufs>>
+0000000000601340	core::ptr::drop_glue::<alloc::vec::Vec<pipeline::generic::P2Bufs>>
+0000000000601420	core::ptr::drop_glue::<alloc::vec::Vec<pipeline::generic::util::Mapped>>
+00000000006015c0	core::ptr::drop_glue::<alloc::vec::Vec<(pipeline::Kind, std::path::PathBuf, usize)>>
+0000000000601800	core::ptr::drop_glue::<alloc::vec::Vec<(usize, alloc::vec::Vec<pipeline::pqw::Meta>)>>
+0000000000601b40	core::ptr::drop_glue::<pipeline::v3b::ELane<10>>
+0000000000602000	core::ptr::drop_glue::<alloc::vec::into_iter::IntoIter<pipeline::generic::P1>>
+00000000006020e0	core::ptr::drop_glue::<alloc::vec::into_iter::IntoIter<pipeline::generic::P2>>
+0000000000602420	core::ptr::drop_glue::<alloc::vec::into_iter::IntoIter<(pipeline::generic::core::Scratch, pipeline::generic::core::ShardBufs, std::collections::hash::map::HashMap<u64, [u64; 4], core::hash::BuildHasherDefault<pipeline::generic::util::H>>)>>
+0000000000602500	core::ptr::drop_glue::<pipeline::generic::core::Parts<pipeline::generic::core::Ck>>
+0000000000602660	core::ptr::drop_glue::<pipeline::generic::core::Parts<pipeline::generic::core::Ev>>
+00000000006027c0	core::ptr::drop_glue::<pipeline::generic::core::Parts<pipeline::generic::core::Rec>>
+0000000000602920	core::ptr::drop_glue::<std::sync::poison::PoisonError<core::option::Option<pipeline::generic::core::LinkMap>>>
+00000000006029a0	core::ptr::drop_glue::<std::collections::hash::map::HashMap<&[u8], u32, core::hash::BuildHasherDefault<pipeline::generic::util::H>>>
+0000000000602a60	core::ptr::drop_glue::<std::collections::hash::map::HashMap<u64, [u64; 4], core::hash::BuildHasherDefault<pipeline::generic::util::H>>>
+0000000000602b20	core::ptr::drop_glue::<std::thread::lifecycle::spawn_unchecked<pipeline::generic::util::par_run<pipeline::generic::P1Bufs, pipeline::generic::P1, <pipeline::generic::P1Bufs as core::default::Default>::default, pipeline::generic::run::{closure#8}>::{closure#0}, (alloc::vec::Vec<(usize, pipeline::generic::P1)>, pipeline::generic::P1Bufs)>::{closure#1}>
+0000000000602b40	core::ptr::drop_glue::<std::thread::lifecycle::spawn_unchecked<pipeline::generic::util::par_run<pipeline::generic::P2Bufs, pipeline::generic::P2, <pipeline::generic::P2Bufs as core::default::Default>::default, pipeline::generic::run::{closure#10}>::{closure#0}, (alloc::vec::Vec<(usize, pipeline::generic::P2)>, pipeline::generic::P2Bufs)>::{closure#1}>
+0000000000602b60	core::ptr::drop_glue::<std::thread::lifecycle::spawn_unchecked<pipeline::generic::util::par_run<(pipeline::generic::core::Scratch, pipeline::generic::core::ShardBufs, std::collections::hash::map::HashMap<u64, [u64; 4], core::hash::BuildHasherDefault<pipeline::generic::util::H>>), alloc::vec::Vec<pipeline::generic::core::UserRow>, pipeline::generic::run::{closure#11}, pipeline::generic::run::{closure#12}>::{closure#0}, (alloc::vec::Vec<(usize, alloc::vec::Vec<pipeline::generic::core::UserRow>)>, (pipeline::generic::core::Scratch, pipeline::generic::core::ShardBufs, std::collections::hash::map::HashMap<u64, [u64; 4], core::hash::BuildHasherDefault<pipeline::generic::util::H>>))>::{closure#1}>
+0000000000602b80	core::ptr::drop_glue::<std::thread::lifecycle::spawn_unchecked<pipeline::generic::util::par_run<(), core::result::Result<(), core::io::error::Error>, pipeline::generic::run::{closure#13}, pipeline::generic::run::{closure#14}>::{closure#0}, (alloc::vec::Vec<(usize, core::result::Result<(), core::io::error::Error>)>, ())>::{closure#1}>
+0000000000602ba0	core::ptr::drop_glue::<std::thread::lifecycle::spawn_unchecked<pipeline::sys::run_par<pipeline::main::{closure#22}>::{closure#0}::{closure#0}, ()>::{closure#1}>
+0000000000602bc0	core::ptr::drop_glue::<std::thread::lifecycle::spawn_unchecked<pipeline::sys::pool_start::{closure#0}, ()>::{closure#1}>
+0000000000602be0	core::ptr::drop_glue::<std::thread::lifecycle::spawn_unchecked<pipeline::sys::worker::{closure#0}, ()>::{closure#1}>
+0000000000602c00	core::ptr::drop_glue::<std::thread::lifecycle::spawn_unchecked<pipeline::v3b::links_start::{closure#1}, [u64; 3]>::{closure#1}>
+0000000000602c40	core::ptr::drop_glue::<std::thread::lifecycle::spawn_unchecked<pipeline::setup::setup::{closure#2}, pipeline::setup::Lookups>::{closure#1}>
+0000000000602de0	core::ptr::drop_glue::<pipeline::out::S3Ctx>
+0000000000603080	core::ptr::drop_glue::<pipeline::pqw::Plan>
+0000000000603200	core::ptr::drop_glue::<pipeline::pqw::UserFile>
+00000000006032e0	core::ptr::drop_glue::<pipeline::v3b::B3>
+00000000006058a0	core::ptr::drop_glue::<pipeline::v3b::KTab>
+0000000000605aa0	core::ptr::drop_glue::<pipeline::v3b::StrBuf>
+0000000000605c20	core::ptr::drop_glue::<pipeline::core::Core>
+0000000000605f40	core::ptr::drop_glue::<pipeline::links::Uf>
+0000000000606320	core::ptr::drop_glue::<pipeline::links::Plan>
+00000000006069a0	core::ptr::drop_glue::<pipeline::links::PlanA>
+0000000000606fa0	core::ptr::drop_glue::<pipeline::links::PlanX>
+00000000006073c0	core::ptr::drop_glue::<pipeline::links::Scratch>
+0000000000608100	core::ptr::drop_glue::<pipeline::parse::Part>
+0000000000608600	core::ptr::drop_glue::<pipeline::parse::EvPart>
+0000000000608ce0	core::ptr::drop_glue::<pipeline::keyrec::Sample>
+0000000000608e40	core::ptr::drop_glue::<pipeline::complex::PScratch>
+00000000006090a0	core::ptr::drop_glue::<pipeline::generic::P1>
+0000000000609180	core::ptr::drop_glue::<pipeline::generic::P2Bufs>
+0000000000609720	core::ptr::drop_glue::<pipeline::generic::core::LinkMap>
+00000000006099c0	core::ptr::drop_glue::<pipeline::generic::core::Scratch>
+0000000000609ec0	core::ptr::drop_glue::<pipeline::generic::core::ShardBufs>
+000000000060a6e0	core::ptr::drop_glue::<(alloc::vec::Vec<(usize, alloc::vec::Vec<pipeline::generic::core::UserRow>)>, (pipeline::generic::core::Scratch, pipeline::generic::core::ShardBufs, std::collections::hash::map::HashMap<u64, [u64; 4], core::hash::BuildHasherDefault<pipeline::generic::util::H>>))>
+000000000060a960	core::ptr::drop_glue::<(alloc::vec::Vec<(usize, pipeline::generic::P1)>, pipeline::generic::P1Bufs)>
+000000000060aae0	core::ptr::drop_glue::<(alloc::vec::Vec<(usize, pipeline::generic::P2)>, pipeline::generic::P2Bufs)>
+000000000060abe0	core::ptr::drop_glue::<(pipeline::generic::core::Scratch, pipeline::generic::core::ShardBufs, std::collections::hash::map::HashMap<u64, [u64; 4], core::hash::BuildHasherDefault<pipeline::generic::util::H>>)>
+000000000060acc0	pipeline::k_free::slow::split_line::<4>
+000000000060afc0	pipeline::k_free::slow::split_line::<7>
+000000000060b2e0	pipeline::k_free::slow::click::<pipeline::v3b::Sink>
+000000000060bba0	pipeline::k_free::slow::click::<pipeline::parse::Ctx>
+000000000060c460	pipeline::k_free::slow::event::<pipeline::v3b::Sink>
+000000000060d140	pipeline::k_free::slow::event::<pipeline::parse::Ctx>
+000000000060de00	pipeline::generic::util::par_run::<pipeline::generic::P1Bufs, pipeline::generic::P1, <pipeline::generic::P1Bufs as core::default::Default>::default, pipeline::generic::run::{closure#8}>
+000000000060f4e0	pipeline::generic::util::par_run::<pipeline::generic::P2Bufs, pipeline::generic::P2, <pipeline::generic::P2Bufs as core::default::Default>::default, pipeline::generic::run::{closure#10}>
+0000000000610ce0	pipeline::generic::util::par_run::<(pipeline::generic::core::Scratch, pipeline::generic::core::ShardBufs, std::collections::hash::map::HashMap<u64, [u64; 4], core::hash::BuildHasherDefault<pipeline::generic::util::H>>), alloc::vec::Vec<pipeline::generic::core::UserRow>, pipeline::generic::run::{closure#11}, pipeline::generic::run::{closure#12}>
+0000000000612260	pipeline::generic::util::par_run::<(), core::result::Result<(), core::io::error::Error>, pipeline::generic::run::{closure#13}, pipeline::generic::run::{closure#14}>
+0000000000613140	pipeline::generic::parse::split::<2>
+0000000000613410	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::generic::util::par_run<pipeline::generic::P1Bufs, pipeline::generic::P1, <pipeline::generic::P1Bufs as core::default::Default>::default, pipeline::generic::run::{closure#8}>::{closure#0}, (alloc::vec::Vec<(usize, pipeline::generic::P1)>, pipeline::generic::P1Bufs)>
+0000000000613418	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::generic::util::par_run<pipeline::generic::P2Bufs, pipeline::generic::P2, <pipeline::generic::P2Bufs as core::default::Default>::default, pipeline::generic::run::{closure#10}>::{closure#0}, (alloc::vec::Vec<(usize, pipeline::generic::P2)>, pipeline::generic::P2Bufs)>
+0000000000613420	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::generic::util::par_run<(pipeline::generic::core::Scratch, pipeline::generic::core::ShardBufs, std::collections::hash::map::HashMap<u64, [u64; 4], core::hash::BuildHasherDefault<pipeline::generic::util::H>>), alloc::vec::Vec<pipeline::generic::core::UserRow>, pipeline::generic::run::{closure#11}, pipeline::generic::run::{closure#12}>::{closure#0}, (alloc::vec::Vec<(usize, alloc::vec::Vec<pipeline::generic::core::UserRow>)>, (pipeline::generic::core::Scratch, pipeline::generic::core::ShardBufs, std::collections::hash::map::HashMap<u64, [u64; 4], core::hash::BuildHasherDefault<pipeline::generic::util::H>>))>
+0000000000613428	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::generic::util::par_run<(), core::result::Result<(), core::io::error::Error>, pipeline::generic::run::{closure#13}, pipeline::generic::run::{closure#14}>::{closure#0}, (alloc::vec::Vec<(usize, core::result::Result<(), core::io::error::Error>)>, ())>
+0000000000613430	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::sys::run_par<pipeline::main::{closure#22}>::{closure#0}::{closure#0}, ()>
+0000000000613438	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::sys::run_par<pipeline::main::{closure#30}>::{closure#0}::{closure#0}, ()>
+0000000000613440	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::sys::run_par<pipeline::out::stage5::{closure#0}>::{closure#0}::{closure#0}, ()>
+0000000000613448	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::sys::run_par<pipeline::out::stage45::{closure#8}>::{closure#0}::{closure#0}, ()>
+0000000000613450	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::sys::run_par<pipeline::v3b::run::{closure#8}>::{closure#0}::{closure#0}, ()>
+0000000000613458	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::sys::run_par<pipeline::v3b::run::{closure#11}>::{closure#0}::{closure#0}, ()>
+0000000000613460	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::sys::run_par<pipeline::v3b::run::{closure#12}>::{closure#0}::{closure#0}, ()>
+0000000000613468	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::sys::run_par<pipeline::v3b::run::{closure#15}>::{closure#0}::{closure#0}, ()>
+0000000000613470	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::sys::run_par<pipeline::v3b::run::{closure#16}>::{closure#0}::{closure#0}, ()>
+0000000000613478	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::sys::run_par<pipeline::v3b::run::{closure#17}>::{closure#0}::{closure#0}, ()>
+0000000000613480	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::sys::run_par<pipeline::links::stage2::{closure#0}>::{closure#0}::{closure#0}, ()>
+0000000000613488	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::sys::run_par<pipeline::setup::setup_par::{closure#11}>::{closure#0}::{closure#0}, ()>
+0000000000613490	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::sys::run_par<pipeline::events::stage3::{closure#2}>::{closure#0}::{closure#0}, ()>
+0000000000613498	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::sys::run_par<pipeline::events::stage3::{closure#6}>::{closure#0}::{closure#0}, ()>
+00000000006134a0	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::sys::run_par<pipeline::complex::stage4::{closure#0}>::{closure#0}::{closure#0}, ()>
+00000000006134c0	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::sys::run_par<pipeline::complex::stage4::{closure#1}>::{closure#0}::{closure#0}, ()>
+0000000000613580	std::sys::backtrace::__rust_begin_short_backtrace::<std::thread::lifecycle::spawn_unchecked<pipeline::generic::util::par_run<pipeline::generic::P1Bufs, pipeline::generic::P1, <pipeline::generic::P1Bufs as core::default::Default>::default, pipeline::generic::run::{closure#8}>::{closure#0}, (alloc::vec::Vec<(usize, pipeline::generic::P1)>, pipeline::generic::P1Bufs)>::{closure#1}::{closure#0}::{closure#0}, ()>
+0000000000613590	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::sys::pool_start::{closure#0}, ()>
+00000000006135a0	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::sys::worker::{closure#0}, ()>
+00000000006135b0	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::v3b::links_start::{closure#1}, [u64; 3]>
+00000000006135e0	std::sys::backtrace::__rust_begin_short_backtrace::<pipeline::setup::setup::{closure#2}, pipeline::setup::Lookups>
+0000000000614cc0	core::slice::sort::select::median_of_medians::<(u32, u64), <[(u32, u64)]>::select_nth_unstable_by<pipeline::keyrec::recover_user_key::{closure#3}>::{closure#0}>
+0000000000615960	core::slice::sort::stable::driftsort_main::<[u64; 2], <[[u64; 2]]>::sort_by_key<u64, pipeline::links::slow_sort::{closure#0}>::{closure#0}, alloc::vec::Vec<[u64; 2]>>
+0000000000615ae0	core::slice::sort::stable::driftsort_main::<[u64; 2], <[[u64; 2]]>::sort_by<pipeline::links::stage2::{closure#2}>::{closure#0}, alloc::vec::Vec<[u64; 2]>>
+0000000000615c80	core::slice::sort::stable::driftsort_main::<[u64; 2], <[[u64; 2]]>::sort_by<pipeline::links::stage2::{closure#1}>::{closure#0}, alloc::vec::Vec<[u64; 2]>>
+0000000000615e20	core::slice::sort::stable::driftsort_main::<[u64; 2], <[[u64; 2]]>::sort_by<pipeline::links::tie_group::{closure#4}>::{closure#0}, alloc::vec::Vec<[u64; 2]>>
+0000000000615fc0	core::slice::sort::stable::driftsort_main::<alloc::vec::Vec<pipeline::Seg>, <[alloc::vec::Vec<pipeline::Seg>]>::sort_by_key<core::cmp::Reverse<u64>, pipeline::events::stage3::{closure#5}>::{closure#0}, alloc::vec::Vec<alloc::vec::Vec<pipeline::Seg>>>
+00000000006160c0	core::slice::sort::stable::driftsort_main::<pipeline::Chunk, <[pipeline::Chunk]>::sort_by_key<i32, pipeline::v3b::run::{closure#4}>::{closure#0}, alloc::vec::Vec<pipeline::Chunk>>
+0000000000616240	core::slice::sort::stable::driftsort_main::<pipeline::Chunk, <[pipeline::Chunk]>::sort_by_key<i32, pipeline::parse::work_queue_build::{closure#1}>::{closure#0}, alloc::vec::Vec<pipeline::Chunk>>
+00000000006163c0	core::slice::sort::stable::driftsort_main::<pipeline::setup::LFile, <[pipeline::setup::LFile]>::sort_by<pipeline::setup::setup_par::{closure#11}::{closure#1}>::{closure#0}, alloc::vec::Vec<pipeline::setup::LFile>>
+00000000006165c0	core::slice::sort::stable::driftsort_main::<(pipeline::Kind, std::path::PathBuf, usize), <[(pipeline::Kind, std::path::PathBuf, usize)]>::sort_by<pipeline::setup::setup::{closure#3}>::{closure#0}, alloc::vec::Vec<(pipeline::Kind, std::path::PathBuf, usize)>>
+00000000006166c0	core::slice::sort::stable::driftsort_main::<(pipeline::v3b::Key, pipeline::v3b::Key), <[(pipeline::v3b::Key, pipeline::v3b::Key)]>::sort_by_key<(u64, u64), pipeline::v3b::links_check::{closure#2}>::{closure#0}, alloc::vec::Vec<(pipeline::v3b::Key, pipeline::v3b::Key)>>
+0000000000616940	core::slice::sort::stable::driftsort_main::<u32, <[u32]>::sort_by_key<i32, pipeline::parse::work_queue_build::{closure#2}>::{closure#0}, alloc::vec::Vec<u32>>
+0000000000616c60	core::slice::sort::unstable::ipnsort::<[u64; 3], <[[u64; 3]]>::sort_unstable_by<pipeline::complex::person_shard::{closure#4}>::{closure#0}>
+00000000006171c0	core::slice::sort::unstable::ipnsort::<pipeline::Rec, <[pipeline::Rec]>::sort_unstable_by_key<u128, pipeline::complex::person_shard::{closure#0}>::{closure#0}>
+0000000000617320	core::slice::sort::unstable::ipnsort::<pipeline::Rec, <[pipeline::Rec]>::sort_unstable_by_key<u64, pipeline::events::simple_run::{closure#2}>::{closure#0}>
+0000000000617460	core::slice::sort::unstable::ipnsort::<pipeline::generic::core::PC, <[pipeline::generic::core::PC]>::sort_unstable_by<pipeline::generic::core::person::{closure#1}>::{closure#0}>
+00000000006176a0	core::slice::sort::unstable::ipnsort::<pipeline::generic::core::PE, <[pipeline::generic::core::PE]>::sort_unstable_by_key<i64, pipeline::generic::core::person::{closure#0}>::{closure#0}>
+00000000006179e0	core::slice::sort::unstable::ipnsort::<(usize, usize), <[(usize, usize)]>::sort_unstable_by<pipeline::complex::shard_order::{closure#1}>::{closure#0}>
+0000000000617d20	core::slice::sort::unstable::ipnsort::<(u128, u64, [u64; 3]), <[(u128, u64, [u64; 3])]>::sort_unstable_by<pipeline::complex::person_shard::{closure#3}>::{closure#0}>
+0000000000618040	core::slice::sort::unstable::ipnsort::<(u64, [u64; 2]), <[(u64, [u64; 2])]>::sort_unstable_by<pipeline::links::tie_group::{closure#2}>::{closure#0}>
+0000000000618500	core::slice::sort::shared::pivot::median3_rec::<[u64; 2], <[[u64; 2]]>::sort_by_key<u64, pipeline::links::slow_sort::{closure#0}>::{closure#0}>
+00000000006185c0	core::slice::sort::shared::pivot::median3_rec::<[u64; 2], <[[u64; 2]]>::sort_by<pipeline::links::stage2::{closure#2}>::{closure#0}>
+0000000000618800	core::slice::sort::shared::pivot::median3_rec::<[u64; 3], <[[u64; 3]]>::sort_unstable_by<pipeline::complex::person_shard::{closure#4}>::{closure#0}>
+00000000006189e0	core::slice::sort::shared::pivot::median3_rec::<alloc::vec::Vec<pipeline::Seg>, <[alloc::vec::Vec<pipeline::Seg>]>::sort_by_key<core::cmp::Reverse<u64>, pipeline::events::stage3::{closure#5}>::{closure#0}>
+00000000006194e0	core::slice::sort::shared::pivot::median3_rec::<pipeline::Rec, <[pipeline::Rec]>::sort_unstable_by_key<u128, pipeline::complex::person_shard::{closure#0}>::{closure#0}>
+00000000006195c0	core::slice::sort::shared::pivot::median3_rec::<pipeline::Rec, <[pipeline::Rec]>::sort_unstable_by_key<u64, pipeline::events::simple_run::{closure#2}>::{closure#0}>
+0000000000619680	core::slice::sort::shared::pivot::median3_rec::<pipeline::Chunk, <[pipeline::Chunk]>::sort_by_key<i32, pipeline::v3b::run::{closure#4}>::{closure#0}>
+00000000006197a0	core::slice::sort::shared::pivot::median3_rec::<pipeline::Chunk, <[pipeline::Chunk]>::sort_by_key<i32, pipeline::parse::work_queue_build::{closure#1}>::{closure#0}>
+00000000006199c0	core::slice::sort::shared::pivot::median3_rec::<pipeline::setup::LFile, <[pipeline::setup::LFile]>::sort_by<pipeline::setup::setup_par::{closure#11}::{closure#1}>::{closure#0}>
+0000000000619de0	core::slice::sort::shared::pivot::median3_rec::<pipeline::generic::core::PC, <[pipeline::generic::core::PC]>::sort_unstable_by<pipeline::generic::core::person::{closure#1}>::{closure#0}>
+0000000000619f40	core::slice::sort::shared::pivot::median3_rec::<pipeline::generic::core::PE, <[pipeline::generic::core::PE]>::sort_unstable_by_key<i64, pipeline::generic::core::person::{closure#0}>::{closure#0}>
+000000000061a140	core::slice::sort::shared::pivot::median3_rec::<(pipeline::Kind, std::path::PathBuf, usize), <[(pipeline::Kind, std::path::PathBuf, usize)]>::sort_by<pipeline::setup::setup::{closure#3}>::{closure#0}>
+000000000061a3e0	core::slice::sort::shared::pivot::median3_rec::<(pipeline::v3b::Key, pipeline::v3b::Key), <[(pipeline::v3b::Key, pipeline::v3b::Key)]>::sort_by_key<(u64, u64), pipeline::v3b::links_check::{closure#2}>::{closure#0}>
+000000000061a4e0	core::slice::sort::shared::pivot::median3_rec::<(usize, usize), <[(usize, usize)]>::sort_unstable_by<pipeline::complex::shard_order::{closure#1}>::{closure#0}>
+000000000061a6c0	core::slice::sort::shared::pivot::median3_rec::<(u32, u64), <[(u32, u64)]>::select_nth_unstable_by<pipeline::keyrec::recover_user_key::{closure#3}>::{closure#0}>
+000000000061a780	core::slice::sort::shared::pivot::median3_rec::<(u128, u64, [u64; 3]), <[(u128, u64, [u64; 3])]>::sort_unstable_by<pipeline::complex::person_shard::{closure#3}>::{closure#0}>
+000000000061a9c0	core::slice::sort::shared::pivot::median3_rec::<(u64, [u64; 2]), <[(u64, [u64; 2])]>::sort_unstable_by<pipeline::links::tie_group::{closure#2}>::{closure#0}>
+000000000061ad20	core::slice::sort::shared::pivot::median3_rec::<u32, <[u32]>::sort_by_key<i32, pipeline::parse::work_queue_build::{closure#2}>::{closure#0}>
+000000000061aff0	core::slice::sort::shared::smallsort::sort4_stable::<[u64; 2], <[[u64; 2]]>::sort_by<pipeline::links::stage2::{closure#2}>::{closure#0}>
+000000000061b360	core::slice::sort::shared::smallsort::sort4_stable::<[u64; 3], <[[u64; 3]]>::sort_unstable_by<pipeline::complex::person_shard::{closure#4}>::{closure#0}>
+000000000061b680	core::slice::sort::shared::smallsort::sort4_stable::<alloc::vec::Vec<pipeline::Seg>, <[alloc::vec::Vec<pipeline::Seg>]>::sort_by_key<core::cmp::Reverse<u64>, pipeline::events::stage3::{closure#5}>::{closure#0}>
+000000000061c810	core::slice::sort::shared::smallsort::sort4_stable::<pipeline::Rec, <[pipeline::Rec]>::sort_unstable_by_key<u128, pipeline::complex::person_shard::{closure#0}>::{closure#0}>
+000000000061c900	core::slice::sort::shared::smallsort::sort4_stable::<pipeline::Chunk, <[pipeline::Chunk]>::sort_by_key<i32, pipeline::v3b::run::{closure#4}>::{closure#0}>
+000000000061cb20	core::slice::sort::shared::smallsort::sort4_stable::<pipeline::Chunk, <[pipeline::Chunk]>::sort_by_key<i32, pipeline::parse::work_queue_build::{closure#1}>::{closure#0}>
+000000000061ce80	core::slice::sort::shared::smallsort::sort4_stable::<pipeline::setup::LFile, <[pipeline::setup::LFile]>::sort_by<pipeline::setup::setup_par::{closure#11}::{closure#1}>::{closure#0}>
+000000000061d500	core::slice::sort::shared::smallsort::sort4_stable::<pipeline::generic::core::PC, <[pipeline::generic::core::PC]>::sort_unstable_by<pipeline::generic::core::person::{closure#1}>::{closure#0}>
+000000000061d8c0	core::slice::sort::shared::smallsort::sort4_stable::<(pipeline::Kind, std::path::PathBuf, usize), <[(pipeline::Kind, std::path::PathBuf, usize)]>::sort_by<pipeline::setup::setup::{closure#3}>::{closure#0}>
+000000000061dee0	core::slice::sort::shared::smallsort::sort4_stable::<u32, <[u32]>::sort_by_key<i32, pipeline::parse::work_queue_build::{closure#2}>::{closure#0}>
+000000000061e240	core::slice::sort::shared::smallsort::sort8_stable::<[u64; 2], <[[u64; 2]]>::sort_by_key<u64, pipeline::links::slow_sort::{closure#0}>::{closure#0}>
+000000000061e900	core::slice::sort::shared::smallsort::sort8_stable::<pipeline::Rec, <[pipeline::Rec]>::sort_unstable_by_key<u128, pipeline::complex::person_shard::{closure#0}>::{closure#0}>
+000000000061ebe0	core::slice::sort::shared::smallsort::sort8_stable::<pipeline::Rec, <[pipeline::Rec]>::sort_unstable_by_key<u64, pipeline::events::simple_run::{closure#2}>::{closure#0}>
+000000000061ef80	core::slice::sort::shared::smallsort::sort8_stable::<pipeline::generic::core::PE, <[pipeline::generic::core::PE]>::sort_unstable_by_key<i64, pipeline::generic::core::person::{closure#0}>::{closure#0}>
+000000000061f2e0	core::slice::sort::shared::smallsort::sort8_stable::<(usize, usize), <[(usize, usize)]>::sort_unstable_by<pipeline::complex::shard_order::{closure#1}>::{closure#0}>
+00000000006207a0	core::slice::sort::shared::smallsort::small_sort_general::<[u64; 3], <[[u64; 3]]>::sort_unstable_by<pipeline::complex::person_shard::{closure#4}>::{closure#0}>
+0000000000621340	core::slice::sort::shared::smallsort::small_sort_general::<pipeline::generic::core::PC, <[pipeline::generic::core::PC]>::sort_unstable_by<pipeline::generic::core::person::{closure#1}>::{closure#0}>
+00000000006218c0	core::slice::sort::shared::smallsort::small_sort_general::<(u128, u64, [u64; 3]), <[(u128, u64, [u64; 3])]>::sort_unstable_by<pipeline::complex::person_shard::{closure#3}>::{closure#0}>
+00000000006221c0	core::slice::sort::shared::smallsort::small_sort_general::<(u64, [u64; 2]), <[(u64, [u64; 2])]>::sort_unstable_by<pipeline::links::tie_group::{closure#2}>::{closure#0}>
+0000000000622840	core::slice::sort::shared::smallsort::bidirectional_merge::<[u64; 2], <[[u64; 2]]>::sort_by<pipeline::links::stage2::{closure#2}>::{closure#0}>
+0000000000622be0	core::slice::sort::shared::smallsort::bidirectional_merge::<u32, <[u32]>::sort_by_key<i32, pipeline::parse::work_queue_build::{closure#2}>::{closure#0}>
+0000000000622e80	core::slice::sort::shared::smallsort::insertion_sort_shift_left::<[u64; 2], <[[u64; 2]]>::sort_by_key<u64, pipeline::links::slow_sort::{closure#0}>::{closure#0}>
+0000000000622fe0	core::slice::sort::shared::smallsort::insertion_sort_shift_left::<[u64; 2], <[[u64; 2]]>::sort_by<pipeline::links::stage2::{closure#2}>::{closure#0}>
+0000000000623100	core::slice::sort::shared::smallsort::insertion_sort_shift_left::<[u64; 3], <[[u64; 3]]>::sort_unstable_by<pipeline::complex::person_shard::{closure#4}>::{closure#0}>
+00000000006232e0	core::slice::sort::shared::smallsort::insertion_sort_shift_left::<alloc::vec::Vec<pipeline::Seg>, <[alloc::vec::Vec<pipeline::Seg>]>::sort_by_key<core::cmp::Reverse<u64>, pipeline::events::stage3::{closure#5}>::{closure#0}>
+0000000000623ac0	core::slice::sort::shared::smallsort::insertion_sort_shift_left::<pipeline::Rec, <[pipeline::Rec]>::sort_unstable_by_key<u128, pipeline::complex::person_shard::{closure#0}>::{closure#0}>
+0000000000623b60	core::slice::sort::shared::smallsort::insertion_sort_shift_left::<pipeline::Chunk, <[pipeline::Chunk]>::sort_by_key<i32, pipeline::v3b::run::{closure#4}>::{closure#0}>
+0000000000623c80	core::slice::sort::shared::smallsort::insertion_sort_shift_left::<pipeline::setup::LFile, <[pipeline::setup::LFile]>::sort_by<pipeline::setup::setup_par::{closure#11}::{closure#1}>::{closure#0}>
+0000000000624260	core::slice::sort::shared::smallsort::insertion_sort_shift_left::<(pipeline::Kind, std::path::PathBuf, usize), <[(pipeline::Kind, std::path::PathBuf, usize)]>::sort_by<pipeline::setup::setup::{closure#3}>::{closure#0}>
+00000000006244e0	core::slice::sort::shared::smallsort::insertion_sort_shift_left::<(pipeline::v3b::Key, pipeline::v3b::Key), <[(pipeline::v3b::Key, pipeline::v3b::Key)]>::sort_by_key<(u64, u64), pipeline::v3b::links_check::{closure#2}>::{closure#0}>
+00000000006245c0	core::slice::sort::shared::smallsort::insertion_sort_shift_left::<(u128, u64, [u64; 3]), <[(u128, u64, [u64; 3])]>::sort_unstable_by<pipeline::complex::person_shard::{closure#3}>::{closure#0}>
+0000000000624960	core::slice::sort::stable::drift::sort::<[u64; 2], <[[u64; 2]]>::sort_by_key<u64, pipeline::links::slow_sort::{closure#0}>::{closure#0}>
+0000000000625020	core::slice::sort::stable::drift::sort::<[u64; 2], <[[u64; 2]]>::sort_by<pipeline::links::stage2::{closure#2}>::{closure#0}>
+0000000000625800	core::slice::sort::stable::drift::sort::<[u64; 2], <[[u64; 2]]>::sort_by<pipeline::links::stage2::{closure#1}>::{closure#0}>
+0000000000625fe0	core::slice::sort::stable::drift::sort::<[u64; 2], <[[u64; 2]]>::sort_by<pipeline::links::tie_group::{closure#4}>::{closure#0}>
+00000000006267c0	core::slice::sort::stable::drift::sort::<alloc::vec::Vec<pipeline::Seg>, <[alloc::vec::Vec<pipeline::Seg>]>::sort_by_key<core::cmp::Reverse<u64>, pipeline::events::stage3::{closure#5}>::{closure#0}>
+0000000000627e60	core::slice::sort::stable::drift::sort::<pipeline::Chunk, <[pipeline::Chunk]>::sort_by_key<i32, pipeline::v3b::run::{closure#4}>::{closure#0}>
+00000000006286c0	core::slice::sort::stable::drift::sort::<pipeline::Chunk, <[pipeline::Chunk]>::sort_by_key<i32, pipeline::parse::work_queue_build::{closure#1}>::{closure#0}>
+00000000006290e0	core::slice::sort::stable::drift::sort::<pipeline::setup::LFile, <[pipeline::setup::LFile]>::sort_by<pipeline::setup::setup_par::{closure#11}::{closure#1}>::{closure#0}>
+000000000062a5a0	core::slice::sort::stable::drift::sort::<(pipeline::Kind, std::path::PathBuf, usize), <[(pipeline::Kind, std::path::PathBuf, usize)]>::sort_by<pipeline::setup::setup::{closure#3}>::{closure#0}>
+000000000062b000	core::slice::sort::stable::drift::sort::<(pipeline::v3b::Key, pipeline::v3b::Key), <[(pipeline::v3b::Key, pipeline::v3b::Key)]>::sort_by_key<(u64, u64), pipeline::v3b::links_check::{closure#2}>::{closure#0}>
+000000000062c040	core::slice::sort::stable::drift::sort::<u32, <[u32]>::sort_by_key<i32, pipeline::parse::work_queue_build::{closure#2}>::{closure#0}>
+000000000062cb00	core::slice::sort::stable::quicksort::quicksort::<[u64; 2], <[[u64; 2]]>::sort_by_key<u64, pipeline::links::slow_sort::{closure#0}>::{closure#0}>
+000000000062d720	core::slice::sort::stable::quicksort::quicksort::<[u64; 2], <[[u64; 2]]>::sort_by<pipeline::links::stage2::{closure#2}>::{closure#0}>
+000000000062e5c0	core::slice::sort::stable::quicksort::quicksort::<[u64; 2], <[[u64; 2]]>::sort_by<pipeline::links::stage2::{closure#1}>::{closure#0}>
+000000000062f460	core::slice::sort::stable::quicksort::quicksort::<[u64; 2], <[[u64; 2]]>::sort_by<pipeline::links::tie_group::{closure#4}>::{closure#0}>
+0000000000630300	core::slice::sort::stable::quicksort::quicksort::<alloc::vec::Vec<pipeline::Seg>, <[alloc::vec::Vec<pipeline::Seg>]>::sort_by_key<core::cmp::Reverse<u64>, pipeline::events::stage3::{closure#5}>::{closure#0}>
+0000000000633180	core::slice::sort::stable::quicksort::quicksort::<pipeline::Chunk, <[pipeline::Chunk]>::sort_by_key<i32, pipeline::v3b::run::{closure#4}>::{closure#0}>
+0000000000633e20	core::slice::sort::stable::quicksort::quicksort::<pipeline::Chunk, <[pipeline::Chunk]>::sort_by_key<i32, pipeline::parse::work_queue_build::{closure#1}>::{closure#0}>
+0000000000634fa0	core::slice::sort::stable::quicksort::quicksort::<pipeline::setup::LFile, <[pipeline::setup::LFile]>::sort_by<pipeline::setup::setup_par::{closure#11}::{closure#1}>::{closure#0}>
+0000000000637300	core::slice::sort::stable::quicksort::quicksort::<(pipeline::Kind, std::path::PathBuf, usize), <[(pipeline::Kind, std::path::PathBuf, usize)]>::sort_by<pipeline::setup::setup::{closure#3}>::{closure#0}>
+0000000000638640	core::slice::sort::stable::quicksort::quicksort::<(pipeline::v3b::Key, pipeline::v3b::Key), <[(pipeline::v3b::Key, pipeline::v3b::Key)]>::sort_by_key<(u64, u64), pipeline::v3b::links_check::{closure#2}>::{closure#0}>
+000000000063a040	core::slice::sort::stable::quicksort::quicksort::<u32, <[u32]>::sort_by_key<i32, pipeline::parse::work_queue_build::{closure#2}>::{closure#0}>
+000000000063b4c0	core::slice::sort::unstable::heapsort::heapsort::<[u64; 3], <[[u64; 3]]>::sort_unstable_by<pipeline::complex::person_shard::{closure#4}>::{closure#0}>
+000000000063b900	core::slice::sort::unstable::heapsort::heapsort::<pipeline::Rec, <[pipeline::Rec]>::sort_unstable_by_key<u128, pipeline::complex::person_shard::{closure#0}>::{closure#0}>
+000000000063ba00	core::slice::sort::unstable::heapsort::heapsort::<pipeline::Rec, <[pipeline::Rec]>::sort_unstable_by_key<u64, pipeline::events::simple_run::{closure#2}>::{closure#0}>
+000000000063bb00	core::slice::sort::unstable::heapsort::heapsort::<pipeline::generic::core::PC, <[pipeline::generic::core::PC]>::sort_unstable_by<pipeline::generic::core::person::{closure#1}>::{closure#0}>
+000000000063bd20	core::slice::sort::unstable::heapsort::heapsort::<pipeline::generic::core::PE, <[pipeline::generic::core::PE]>::sort_unstable_by_key<i64, pipeline::generic::core::person::{closure#0}>::{closure#0}>
+000000000063bfe0	core::slice::sort::unstable::heapsort::heapsort::<(usize, usize), <[(usize, usize)]>::sort_unstable_by<pipeline::complex::shard_order::{closure#1}>::{closure#0}>
+000000000063c280	core::slice::sort::unstable::heapsort::heapsort::<(u128, u64, [u64; 3]), <[(u128, u64, [u64; 3])]>::sort_unstable_by<pipeline::complex::person_shard::{closure#3}>::{closure#0}>
+000000000063c5e0	core::slice::sort::unstable::heapsort::heapsort::<(u64, [u64; 2]), <[(u64, [u64; 2])]>::sort_unstable_by<pipeline::links::tie_group::{closure#2}>::{closure#0}>
+000000000063d280	core::slice::sort::unstable::quicksort::quicksort::<[u64; 3], <[[u64; 3]]>::sort_unstable_by<pipeline::complex::person_shard::{closure#4}>::{closure#0}>
+000000000063e1c0	core::slice::sort::unstable::quicksort::quicksort::<pipeline::Rec, <[pipeline::Rec]>::sort_unstable_by_key<u128, pipeline::complex::person_shard::{closure#0}>::{closure#0}>
+000000000063e920	core::slice::sort::unstable::quicksort::quicksort::<pipeline::Rec, <[pipeline::Rec]>::sort_unstable_by_key<u64, pipeline::events::simple_run::{closure#2}>::{closure#0}>
+000000000063f280	core::slice::sort::unstable::quicksort::quicksort::<pipeline::generic::core::PC, <[pipeline::generic::core::PC]>::sort_unstable_by<pipeline::generic::core::person::{closure#1}>::{closure#0}>
+000000000063f900	core::slice::sort::unstable::quicksort::quicksort::<pipeline::generic::core::PE, <[pipeline::generic::core::PE]>::sort_unstable_by_key<i64, pipeline::generic::core::person::{closure#0}>::{closure#0}>
+0000000000640b80	core::slice::sort::unstable::quicksort::quicksort::<(usize, usize), <[(usize, usize)]>::sort_unstable_by<pipeline::complex::shard_order::{closure#1}>::{closure#0}>
+0000000000642140	core::slice::sort::unstable::quicksort::quicksort::<(u128, u64, [u64; 3]), <[(u128, u64, [u64; 3])]>::sort_unstable_by<pipeline::complex::person_shard::{closure#3}>::{closure#0}>
+0000000000643260	core::slice::sort::unstable::quicksort::quicksort::<(u64, [u64; 2]), <[(u64, [u64; 2])]>::sort_unstable_by<pipeline::links::tie_group::{closure#2}>::{closure#0}>
+0000000000644d60	std::sys::thread_local::native::lazy::destroy::<core::cell::RefCell<pipeline::out::Split>>
+0000000000644d80	std::sys::thread_local::native::eager::destroy::<core::cell::RefCell<core::option::Option<pipeline::pqw::UserFile>>>
+00000000006450a0	<core::hash::BuildHasherDefault<pipeline::generic::util::H> as core::hash::BuildHasher>::hash_one::<&&[u8]>
+0000000000645260	<core::hash::BuildHasherDefault<pipeline::generic::util::H> as core::hash::BuildHasher>::hash_one::<&[u8]>
+00000000006458c0	<std::sync::once::Once>::call_once_force::<<std::sync::once_lock::OnceLock<alloc::vec::Vec<core::sync::atomic::Atomic<bool>>>>::initialize<<std::sync::once_lock::OnceLock<alloc::vec::Vec<core::sync::atomic::Atomic<bool>>>>::get_or_init<pipeline::parse::fr_done::{closure#0}>::{closure#0}, !>::{closure#0}>::{closure#0}
+0000000000645940	<std::sync::once::Once>::call_once_force::<<std::sync::once_lock::OnceLock<alloc::vec::Vec<usize>>>::initialize<<std::sync::once_lock::OnceLock<alloc::vec::Vec<usize>>>::get_or_init<pipeline::parse::cpu_order::{closure#0}>::{closure#0}, !>::{closure#0}>::{closure#0}
+0000000000646ba0	<std::sync::once::Once>::call_once_force::<<std::sync::once_lock::OnceLock<pipeline::out::S3Ctx>>::initialize<<std::sync::once_lock::OnceLock<pipeline::out::S3Ctx>>::get_or_init<<std::sync::once_lock::OnceLock<pipeline::out::S3Ctx>>::try_insert::{closure#0}>::{closure#0}, !>::{closure#0}>::{closure#0}
+0000000000646c40	<std::sync::once::Once>::call_once_force::<<std::sync::once_lock::OnceLock<pipeline::parse::Drv>>::initialize<<std::sync::once_lock::OnceLock<pipeline::parse::Drv>>::get_or_init<pipeline::parse::drv::{closure#0}>::{closure#0}, !>::{closure#0}>::{closure#0}
+0000000000646d20	<std::sync::once::Once>::call_once_force::<<std::sync::once_lock::OnceLock<pipeline::parse::Tabs>>::initialize<<std::sync::once_lock::OnceLock<pipeline::parse::Tabs>>::get_or_init<pipeline::parse::tabs::{closure#0}>::{closure#0}, !>::{closure#0}>::{closure#0}
+0000000000646fc0	<std::sync::once::Once>::call_once_force::<<std::sync::once_lock::OnceLock<pipeline::parse::Tabs>>::initialize<<std::sync::once_lock::OnceLock<pipeline::parse::Tabs>>::get_or_init<<std::sync::once_lock::OnceLock<pipeline::parse::Tabs>>::try_insert::{closure#0}>::{closure#0}, !>::{closure#0}>::{closure#0}
+0000000000647040	<std::sync::once::Once>::call_once_force::<<std::sync::once_lock::OnceLock<(alloc::vec::Vec<pipeline::Chunk>, usize)>>::initialize<<std::sync::once_lock::OnceLock<(alloc::vec::Vec<pipeline::Chunk>, usize)>>::get_or_init<pipeline::parse::work_queue::{closure#0}>::{closure#0}, !>::{closure#0}>::{closure#0}
+0000000000647be0	<std::sync::once::Once>::call_once_force::<<std::sync::once_lock::OnceLock<bool>>::initialize<<std::sync::once_lock::OnceLock<bool>>::get_or_init<pipeline::parse::popw::{closure#0}>::{closure#0}, !>::{closure#0}>::{closure#0}
+0000000000647e00	<std::sync::once::Once>::call_once_force::<<std::sync::once_lock::OnceLock<usize>>::initialize<<std::sync::once_lock::OnceLock<usize>>::get_or_init<pipeline::parse::fr_k::{closure#0}>::{closure#0}, !>::{closure#0}>::{closure#0}
+0000000000648100	<std::sync::once::Once>::call_once_force::<<std::sync::once_lock::OnceLock<usize>>::initialize<<std::sync::once_lock::OnceLock<usize>>::get_or_init<pipeline::parse::fr_lag::{closure#0}>::{closure#0}, !>::{closure#0}>::{closure#0}
+00000000006483e0	<std::sync::once::Once>::call_once::<pipeline::out::s3_prep::{closure#0}>::{closure#0}
+00000000006484a0	pipeline::generic::util::par_run::<pipeline::generic::P1Bufs, pipeline::generic::P1, <pipeline::generic::P1Bufs as core::default::Default>::default, pipeline::generic::run::{closure#8}>::{closure#0}
+0000000000649f20	pipeline::generic::util::par_run::<pipeline::generic::P2Bufs, pipeline::generic::P2, <pipeline::generic::P2Bufs as core::default::Default>::default, pipeline::generic::run::{closure#10}>::{closure#0}
+000000000064bae0	pipeline::generic::util::par_run::<(pipeline::generic::core::Scratch, pipeline::generic::core::ShardBufs, std::collections::hash::map::HashMap<u64, [u64; 4], core::hash::BuildHasherDefault<pipeline::generic::util::H>>), alloc::vec::Vec<pipeline::generic::core::UserRow>, pipeline::generic::run::{closure#11}, pipeline::generic::run::{closure#12}>::{closure#0}
+000000000064ebc0	pipeline::generic::util::par_run::<(), core::result::Result<(), core::io::error::Error>, pipeline::generic::run::{closure#13}, pipeline::generic::run::{closure#14}>::{closure#0}
+0000000000651be0	pipeline::parse::drv::{closure#0}::{closure#0}
+0000000000651e00	pipeline::setup::setup_par::{closure#11}::{closure#7}
+0000000000652190	pipeline::main::{closure#1}
+00000000006521e0	pipeline::main::{closure#22}
+0000000000653d00	pipeline::main::{closure#25}
+0000000000654260	pipeline::main::{closure#30}
+0000000000654600	pipeline::out::stage5::{closure#0}
+0000000000656580	pipeline::out::stage45::{closure#8}
+0000000000658b60	pipeline::sys::exit_release::{closure#2}
+0000000000658da0	pipeline::sys::exit_release_pieces::{closure#0}
+0000000000658f40	pipeline::sys::exec_init::{closure#0}
+0000000000659080	pipeline::v3b::run::{closure#0}
+0000000000659a80	pipeline::v3b::run::{closure#3}
+0000000000659ca0	pipeline::v3b::run::{closure#8}
+000000000065cfe0	pipeline::v3b::run::{closure#11}
+0000000000661c20	pipeline::v3b::run::{closure#12}
+0000000000662b20	pipeline::v3b::run::{closure#15}
+00000000006663c0	pipeline::v3b::run::{closure#16}
+0000000000667da0	pipeline::v3b::run::{closure#17}
+0000000000669800	pipeline::v3b::run::{closure#19}
+0000000000669cc0	pipeline::links::heavy_count::{closure#0}
+0000000000669f00	pipeline::links::stage2::{closure#0}
+000000000066a240	pipeline::setup::products_part::{closure#0}
+000000000066a4e0	pipeline::setup::lookups::{closure#0}
+000000000066a5e0	pipeline::setup::lookups::{closure#2}
+000000000066a860	pipeline::setup::setup_par::{closure#4}
+000000000066aa40	pipeline::setup::setup_par::{closure#5}
+000000000066ac40	pipeline::setup::setup_par::{closure#10}
+000000000066ca40	pipeline::setup::setup_par::{closure#11}
+000000000066e6f0	pipeline::events::name_selftest::{closure#0}
+000000000066e740	pipeline::events::stage3::{closure#2}
+0000000000675560	pipeline::events::stage3::{closure#6}
+0000000000678a40	pipeline::complex::stage4::{closure#0}
+0000000000678a60	pipeline::complex::stage4::{closure#1}
+0000000000678b20	pipeline::generic::run::{closure#0}
+0000000000678c80	pipeline::generic::run::{closure#3}
+0000000000678e60	pipeline::v3b::pkpm::kb::{closure#0}
+0000000000679020	pipeline::generic::core::parse_links::{closure#0}
+00000000006793e0	pipeline::generic::core::parse_clicks::{closure#0}
+00000000006798c0	pipeline::generic::core::parse_events::{closure#0}
+000000000067a080	pipeline::generic::parse::manifest::{closure#0}
+000000000067a6c0	<<std::sync::once::Once>::call_once_force<<std::sync::once_lock::OnceLock<alloc::vec::Vec<core::sync::atomic::Atomic<bool>>>>::initialize<<std::sync::once_lock::OnceLock<alloc::vec::Vec<core::sync::atomic::Atomic<bool>>>>::get_or_init<pipeline::parse::fr_done::{closure#0}>::{closure#0}, !>::{closure#0}>::{closure#0} as core::ops::function::FnOnce<(&std::sync::once::OnceState,)>>::call_once::{shim:vtable#0}
+000000000067a740	<<std::sync::once::Once>::call_once_force<<std::sync::once_lock::OnceLock<alloc::vec::Vec<usize>>>::initialize<<std::sync::once_lock::OnceLock<alloc::vec::Vec<usize>>>::get_or_init<pipeline::parse::cpu_order::{closure#0}>::{closure#0}, !>::{closure#0}>::{closure#0} as core::ops::function::FnOnce<(&std::sync::once::OnceState,)>>::call_once::{shim:vtable#0}
+000000000067a760	<<std::sync::once::Once>::call_once_force<<std::sync::once_lock::OnceLock<pipeline::out::S3Ctx>>::initialize<<std::sync::once_lock::OnceLock<pipeline::out::S3Ctx>>::get_or_init<<std::sync::once_lock::OnceLock<pipeline::out::S3Ctx>>::try_insert::{closure#0}>::{closure#0}, !>::{closure#0}>::{closure#0} as core::ops::function::FnOnce<(&std::sync::once::OnceState,)>>::call_once::{shim:vtable#0}
+000000000067a800	<<std::sync::once::Once>::call_once_force<<std::sync::once_lock::OnceLock<pipeline::parse::Drv>>::initialize<<std::sync::once_lock::OnceLock<pipeline::parse::Drv>>::get_or_init<pipeline::parse::drv::{closure#0}>::{closure#0}, !>::{closure#0}>::{closure#0} as core::ops::function::FnOnce<(&std::sync::once::OnceState,)>>::call_once::{shim:vtable#0}
+000000000067a8d0	<<std::sync::once::Once>::call_once_force<<std::sync::once_lock::OnceLock<pipeline::parse::Tabs>>::initialize<<std::sync::once_lock::OnceLock<pipeline::parse::Tabs>>::get_or_init<pipeline::parse::tabs::{closure#0}>::{closure#0}, !>::{closure#0}>::{closure#0} as core::ops::function::FnOnce<(&std::sync::once::OnceState,)>>::call_once::{shim:vtable#0}
+000000000067a900	<<std::sync::once::Once>::call_once_force<<std::sync::once_lock::OnceLock<pipeline::parse::Tabs>>::initialize<<std::sync::once_lock::OnceLock<pipeline::parse::Tabs>>::get_or_init<<std::sync::once_lock::OnceLock<pipeline::parse::Tabs>>::try_insert::{closure#0}>::{closure#0}, !>::{closure#0}>::{closure#0} as core::ops::function::FnOnce<(&std::sync::once::OnceState,)>>::call_once::{shim:vtable#0}
+000000000067a980	<<std::sync::once::Once>::call_once_force<<std::sync::once_lock::OnceLock<(alloc::vec::Vec<pipeline::Chunk>, usize)>>::initialize<<std::sync::once_lock::OnceLock<(alloc::vec::Vec<pipeline::Chunk>, usize)>>::get_or_init<pipeline::parse::work_queue::{closure#0}>::{closure#0}, !>::{closure#0}>::{closure#0} as core::ops::function::FnOnce<(&std::sync::once::OnceState,)>>::call_once::{shim:vtable#0}
+000000000067a9a0	<<std::sync::once::Once>::call_once_force<<std::sync::once_lock::OnceLock<bool>>::initialize<<std::sync::once_lock::OnceLock<bool>>::get_or_init<pipeline::parse::popw::{closure#0}>::{closure#0}, !>::{closure#0}>::{closure#0} as core::ops::function::FnOnce<(&std::sync::once::OnceState,)>>::call_once::{shim:vtable#0}
+000000000067a9c0	<<std::sync::once::Once>::call_once_force<<std::sync::once_lock::OnceLock<usize>>::initialize<<std::sync::once_lock::OnceLock<usize>>::get_or_init<pipeline::parse::fr_k::{closure#0}>::{closure#0}, !>::{closure#0}>::{closure#0} as core::ops::function::FnOnce<(&std::sync::once::OnceState,)>>::call_once::{shim:vtable#0}
+000000000067a9e0	<<std::sync::once::Once>::call_once_force<<std::sync::once_lock::OnceLock<usize>>::initialize<<std::sync::once_lock::OnceLock<usize>>::get_or_init<pipeline::parse::fr_lag::{closure#0}>::{closure#0}, !>::{closure#0}>::{closure#0} as core::ops::function::FnOnce<(&std::sync::once::OnceState,)>>::call_once::{shim:vtable#0}
+000000000067aa00	<<std::sync::once::Once>::call_once<pipeline::out::s3_prep::{closure#0}>::{closure#0} as core::ops::function::FnOnce<(&std::sync::once::OnceState,)>>::call_once::{shim:vtable#0}
+000000000067aa20	<std::thread::lifecycle::spawn_unchecked<pipeline::generic::util::par_run<pipeline::generic::P1Bufs, pipeline::generic::P1, <pipeline::generic::P1Bufs as core::default::Default>::default, pipeline::generic::run::{closure#8}>::{closure#0}, (alloc::vec::Vec<(usize, pipeline::generic::P1)>, pipeline::generic::P1Bufs)>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067aac0	<std::thread::lifecycle::spawn_unchecked<pipeline::generic::util::par_run<pipeline::generic::P2Bufs, pipeline::generic::P2, <pipeline::generic::P2Bufs as core::default::Default>::default, pipeline::generic::run::{closure#10}>::{closure#0}, (alloc::vec::Vec<(usize, pipeline::generic::P2)>, pipeline::generic::P2Bufs)>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067aba0	<std::thread::lifecycle::spawn_unchecked<pipeline::generic::util::par_run<(pipeline::generic::core::Scratch, pipeline::generic::core::ShardBufs, std::collections::hash::map::HashMap<u64, [u64; 4], core::hash::BuildHasherDefault<pipeline::generic::util::H>>), alloc::vec::Vec<pipeline::generic::core::UserRow>, pipeline::generic::run::{closure#11}, pipeline::generic::run::{closure#12}>::{closure#0}, (alloc::vec::Vec<(usize, alloc::vec::Vec<pipeline::generic::core::UserRow>)>, (pipeline::generic::core::Scratch, pipeline::generic::core::ShardBufs, std::collections::hash::map::HashMap<u64, [u64; 4], core::hash::BuildHasherDefault<pipeline::generic::util::H>>))>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067ac40	<std::thread::lifecycle::spawn_unchecked<pipeline::generic::util::par_run<(), core::result::Result<(), core::io::error::Error>, pipeline::generic::run::{closure#13}, pipeline::generic::run::{closure#14}>::{closure#0}, (alloc::vec::Vec<(usize, core::result::Result<(), core::io::error::Error>)>, ())>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067ace0	<std::thread::lifecycle::spawn_unchecked<pipeline::sys::run_par<pipeline::main::{closure#22}>::{closure#0}::{closure#0}, ()>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067ae20	<std::thread::lifecycle::spawn_unchecked<pipeline::sys::run_par<pipeline::main::{closure#30}>::{closure#0}::{closure#0}, ()>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067af60	<std::thread::lifecycle::spawn_unchecked<pipeline::sys::run_par<pipeline::out::stage5::{closure#0}>::{closure#0}::{closure#0}, ()>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067b0a0	<std::thread::lifecycle::spawn_unchecked<pipeline::sys::run_par<pipeline::out::stage45::{closure#8}>::{closure#0}::{closure#0}, ()>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067b1e0	<std::thread::lifecycle::spawn_unchecked<pipeline::sys::run_par<pipeline::v3b::run::{closure#8}>::{closure#0}::{closure#0}, ()>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067b320	<std::thread::lifecycle::spawn_unchecked<pipeline::sys::run_par<pipeline::v3b::run::{closure#11}>::{closure#0}::{closure#0}, ()>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067b460	<std::thread::lifecycle::spawn_unchecked<pipeline::sys::run_par<pipeline::v3b::run::{closure#12}>::{closure#0}::{closure#0}, ()>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067b5a0	<std::thread::lifecycle::spawn_unchecked<pipeline::sys::run_par<pipeline::v3b::run::{closure#15}>::{closure#0}::{closure#0}, ()>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067b6e0	<std::thread::lifecycle::spawn_unchecked<pipeline::sys::run_par<pipeline::v3b::run::{closure#16}>::{closure#0}::{closure#0}, ()>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067b820	<std::thread::lifecycle::spawn_unchecked<pipeline::sys::run_par<pipeline::v3b::run::{closure#17}>::{closure#0}::{closure#0}, ()>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067b960	<std::thread::lifecycle::spawn_unchecked<pipeline::sys::run_par<pipeline::links::stage2::{closure#0}>::{closure#0}::{closure#0}, ()>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067baa0	<std::thread::lifecycle::spawn_unchecked<pipeline::sys::run_par<pipeline::setup::setup_par::{closure#11}>::{closure#0}::{closure#0}, ()>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067bbe0	<std::thread::lifecycle::spawn_unchecked<pipeline::sys::run_par<pipeline::events::stage3::{closure#2}>::{closure#0}::{closure#0}, ()>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067bd20	<std::thread::lifecycle::spawn_unchecked<pipeline::sys::run_par<pipeline::events::stage3::{closure#6}>::{closure#0}::{closure#0}, ()>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067be60	<std::thread::lifecycle::spawn_unchecked<pipeline::sys::run_par<pipeline::complex::stage4::{closure#0}>::{closure#0}::{closure#0}, ()>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067bfa0	<std::thread::lifecycle::spawn_unchecked<pipeline::sys::run_par<pipeline::complex::stage4::{closure#1}>::{closure#0}::{closure#0}, ()>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067c100	<std::thread::lifecycle::spawn_unchecked<pipeline::sys::pool_start::{closure#0}, ()>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067c130	<std::thread::lifecycle::spawn_unchecked<pipeline::sys::worker::{closure#0}, ()>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067c180	<std::thread::lifecycle::spawn_unchecked<pipeline::v3b::links_start::{closure#1}, [u64; 3]>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067c2e0	<std::thread::lifecycle::spawn_unchecked<pipeline::setup::setup::{closure#2}, pipeline::setup::Lookups>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}
+000000000067c3b8	<pipeline::main::{closure#1} as core::ops::function::FnOnce<(&std::panic::PanicHookInfo,)>>::call_once::{shim:vtable#0}
+000000000067c3c0	<pipeline::main::{closure#22} as core::ops::function::FnOnce<(usize,)>>::call_once::{shim:vtable#0}
+000000000067c3e0	<pipeline::main::{closure#30} as core::ops::function::FnOnce<(usize,)>>::call_once::{shim:vtable#0}
+000000000067c400	<pipeline::out::stage5::{closure#0} as core::ops::function::FnOnce<(usize,)>>::call_once::{shim:vtable#0}
+000000000067c420	<pipeline::out::stage45::{closure#8} as core::ops::function::FnOnce<(usize,)>>::call_once::{shim:vtable#0}
+000000000067c440	<pipeline::sys::exit_release::{closure#2} as core::ops::function::FnOnce<(usize,)>>::call_once::{shim:vtable#0}
+000000000067c460	<pipeline::sys::exit_release_pieces::{closure#0} as core::ops::function::FnOnce<(usize,)>>::call_once::{shim:vtable#0}
+000000000067c470	<pipeline::v3b::run::{closure#8} as core::ops::function::FnOnce<(usize,)>>::call_once::{shim:vtable#0}
+000000000067c490	<pipeline::v3b::run::{closure#11} as core::ops::function::FnOnce<(usize,)>>::call_once::{shim:vtable#0}
+000000000067c4b0	<pipeline::v3b::run::{closure#12} as core::ops::function::FnOnce<(usize,)>>::call_once::{shim:vtable#0}
+000000000067c4d0	<pipeline::v3b::run::{closure#15} as core::ops::function::FnOnce<(usize,)>>::call_once::{shim:vtable#0}
+000000000067c500	<pipeline::v3b::run::{closure#16} as core::ops::function::FnOnce<(usize,)>>::call_once::{shim:vtable#0}
+000000000067c520	<pipeline::v3b::run::{closure#17} as core::ops::function::FnOnce<(usize,)>>::call_once::{shim:vtable#0}
+000000000067c530	<pipeline::links::stage2::{closure#0} as core::ops::function::FnOnce<(usize,)>>::call_once::{shim:vtable#0}
+000000000067c560	<pipeline::setup::setup_par::{closure#11} as core::ops::function::FnOnce<(usize,)>>::call_once::{shim:vtable#0}
+000000000067c580	<pipeline::events::stage3::{closure#2} as core::ops::function::FnOnce<(usize,)>>::call_once::{shim:vtable#0}
+000000000067c590	<pipeline::events::stage3::{closure#6} as core::ops::function::FnOnce<(usize,)>>::call_once::{shim:vtable#0}
+000000000067c5c0	<pipeline::complex::stage4::{closure#0} as core::ops::function::FnOnce<(usize,)>>::call_once::{shim:vtable#0}
+000000000067c5e0	<pipeline::complex::stage4::{closure#1} as core::ops::function::FnOnce<(usize,)>>::call_once::{shim:vtable#0}
+000000000067cda0	pipeline::run_generic
+0000000000680a40	pipeline::dirs
+0000000000680ec0	pipeline::main
+0000000000696180	pipeline::ncpu_env
+0000000000696440	<pipeline::links::Uf>::node
+00000000006967a0	<pipeline::keyrec::Sample>::add_click_lines
+0000000000697360	<pipeline::keyrec::Sample>::add_event_lines
+0000000000698120	<pipeline::generic::StrBuf>::new
+0000000000698260	<pipeline::sys::Arena>::release_part
+0000000000698500	<pipeline::events::Edge>::piece
+0000000000698700	<pipeline::generic::util::Tab>::reset
+00000000006988e0	<pipeline::pqw::Out>::raw
+00000000006989e0	<pipeline::v3b::ELane<10>>::flush_now_c
+0000000000698a60	<pipeline::v3b::ELane<10>>::alloc
+0000000000698c60	<pipeline::v3b::ELane<10>>::drain
+0000000000698d30	<pipeline::v3b::ELane<10>>::new_chunk
+0000000000698d60	<pipeline::v3b::ELane>::first_chunk
+0000000000698da0	<pipeline::v3b::ELane>::flush_now_c
+0000000000698e20	<pipeline::v3b::ELane>::alloc
+0000000000698fe0	<pipeline::v3b::ELane>::drain
+00000000006990c0	<pipeline::v3b::ELane>::push8
+0000000000699180	<pipeline::v3b::ELane>::new_chunk
+00000000006991c0	<pipeline::parse::EvPart>::flush_full
+00000000006993c0	<pipeline::parse::EvPart>::build
+000000000069a5c0	<pipeline::parse::EvPart>::finish
+000000000069a7e0	<pipeline::parse::EvPart>::esc_chunk
+000000000069a920	<pipeline::parse::EvPart>::new_chunk
+000000000069aa40	<hashbrown::map::HashMap<&[u8], u32, core::hash::BuildHasherDefault<pipeline::generic::util::H>>>::insert
+000000000069adc0	<pipeline::pqw::Tw>::bin
+000000000069afa0	<pipeline::pqw::Tw>::i32
+000000000069b100	<pipeline::pqw::Tw>::i64
+000000000069b260	<pipeline::pqw::Tw>::list
+000000000069b440	<pipeline::pqw::Tw>::begin
+000000000069b560	<pipeline::sys::U64Map>::get_or_insert
+000000000069b800	<pipeline::v3b::KTab>::grow
+000000000069b960	<pipeline::core::Col<u8>>::grow
+000000000069ba20	<pipeline::core::Col<i32>>::grow
+000000000069bae0	<pipeline::parse::Ctx>::ck_one
+000000000069be80	<pipeline::parse::Ctx>::ev_one
+000000000069c2e0	<pipeline::parse::Ctx>::ck_batch
+000000000069d2c0	<pipeline::parse::Ctx>::ev_batch
+000000000069e0a0	<pipeline::parse::Ctx>::raw_token
+000000000069e240	<pipeline::generic::util::Mapped>::open
+000000000069e5a0	<pipeline::v3b::VB>::chunk
+000000000069e6e0	<pipeline::v3b::VB>::finish
+000000000069e820	<pipeline::core::Core>::feed_slice
+000000000069f600	<pipeline::core::Core>::assists_big
+000000000069fd40	<pipeline::core::Core>::new
+00000000006a03a0	<alloc::raw_vec::RawVec<core::cell::UnsafeCell<pipeline::TState>>>::grow_one
+00000000006a0420	<alloc::raw_vec::RawVec<core::cell::UnsafeCell<pipeline::v3b::T3>>>::grow_one
+00000000006a04a0	<alloc::raw_vec::RawVec<pipeline::generic::core::Parts<pipeline::generic::core::Ck>>>::grow_one
+00000000006a0520	<alloc::raw_vec::RawVec<pipeline::Seg>>::grow_one
+00000000006a05a0	<alloc::raw_vec::RawVec<pipeline::OddEv>>::grow_one
+00000000006a0620	<alloc::raw_vec::RawVec<pipeline::pqw::Meta>>::grow_one
+00000000006a06a0	<alloc::raw_vec::RawVec<pipeline::v3b::B3>>::grow_one
+00000000006a0720	<alloc::raw_vec::RawVec<pipeline::v3b::P3>>::grow_one
+00000000006a07a0	<alloc::raw_vec::RawVec<pipeline::v3b::Run2>>::grow_one
+00000000006a0820	<alloc::raw_vec::RawVec<pipeline::links::Heavy>>::grow_one
+00000000006a08a0	<alloc::raw_vec::RawVec<pipeline::links::HeavyA>>::grow_one
+00000000006a0920	<alloc::raw_vec::RawVec<pipeline::links::HeavyX>>::grow_one
+00000000006a09a0	<alloc::raw_vec::RawVec<pipeline::setup::LFile>>::grow_one
+00000000006a0a20	<alloc::raw_vec::RawVec<pipeline::generic::P2Bufs>>::grow_one
+00000000006a0b20	<alloc::raw_vec::RawVec<(pipeline::generic::core::Scratch, pipeline::generic::core::ShardBufs, std::collections::hash::map::HashMap<u64, [u64; 4], core::hash::BuildHasherDefault<pipeline::generic::util::H>>)>>::grow_one
+00000000006a0c20	<alloc::raw_vec::RawVec<(usize, pipeline::generic::P2)>>::grow_one
+00000000006a0ea0	<pipeline::v3b::CBins>::init
+00000000006a11c0	<pipeline::pqw::UserFile>::finish
+00000000006a1680	<pipeline::G>::id_str
+00000000006a1900	<pipeline::parse::Part>::flush_full
+00000000006a1b00	<pipeline::parse::Part>::build
+00000000006a2a80	<pipeline::parse::Part>::flush_one
+00000000006a2bc0	<pipeline::parse::Part>::new_chunk
+00000000006a2ce0	<pipeline::setup::Slot<(alloc::vec::Vec<u8>, alloc::vec::Vec<alloc::vec::Vec<u8>>)>>::set
+00000000006a2dc0	<pipeline::setup::Slot<(alloc::vec::Vec<u8>, alloc::vec::Vec<alloc::vec::Vec<u8>>, usize)>>::get
+00000000006a30c0	<pipeline::v3b::Sink>::ck_rest
+00000000006a37c0	<pipeline::v3b::Sink>::odd_key
+00000000006a3fc0	<pipeline::v3b::Sink>::ck_batch
+00000000006a4520	<pipeline::v3b::Sink>::ev_batch
+00000000006a5660	<pipeline::v3b::Sink>::lk_batch
+00000000006a5e80	<alloc::sync::Arc<std::thread::lifecycle::Packet<pipeline::setup::Lookups>>>::drop_slow
+00000000006a5f80	<alloc::sync::Arc<std::thread::lifecycle::Packet<(alloc::vec::Vec<(usize, alloc::vec::Vec<pipeline::generic::core::UserRow>)>, (pipeline::generic::core::Scratch, pipeline::generic::core::ShardBufs, std::collections::hash::map::HashMap<u64, [u64; 4], core::hash::BuildHasherDefault<pipeline::generic::util::H>>))>>>::drop_slow
+00000000006a6180	<alloc::sync::Arc<std::thread::lifecycle::Packet<(alloc::vec::Vec<(usize, pipeline::generic::P1)>, pipeline::generic::P1Bufs)>>>::drop_slow
+00000000006a6280	<alloc::sync::Arc<std::thread::lifecycle::Packet<(alloc::vec::Vec<(usize, pipeline::generic::P2)>, pipeline::generic::P2Bufs)>>>::drop_slow
+00000000006a65a0	<pipeline::v3b::LkT>::slot_far
+00000000006a6600	<pipeline::v3b::UTab>::slow_click
+00000000006a6660	<pipeline::v3b::UTab>::slow_click_w
+00000000006a6720	<pipeline::v3b::UTab>::slow
+00000000006a6ac0	<pipeline::v3b::UTab>::slow_w
+00000000006a6ea0	<pipeline::v3b::Walk>::apply
+00000000006a7000	pipeline::out::write_rows
+00000000006a7340	pipeline::out::clear_stale
+00000000006a77e0	pipeline::out::end_user_file
+00000000006a78e0	pipeline::out::write_split_to
+00000000006ac460	pipeline::out::die
+00000000006ac4a0	pipeline::out::ctx_new
+00000000006ac6c0	pipeline::out::s3_write
+00000000006aca80	pipeline::pqw::emit_chunk
+00000000006bb0a0	pipeline::pqw::write_file
+00000000006bb8a0	pipeline::pqw::encode_into
+00000000006bcac0	pipeline::pqw::page_header
+00000000006bcd00	pipeline::pqw::emit_dict_off
+00000000006c2940	pipeline::pqw::emit_user_ids
+00000000006ce4c0	pipeline::pqw::put_strs_fast
+00000000006ce8a0	pipeline::pqw::int_chunk_fast
+00000000006cf4e0	pipeline::pqw::emit_plain_strs
+00000000006cf7e0	pipeline::pqw::pack32_any_mode
+00000000006d3660	pipeline::pqw::emit_u8_opt_page
+00000000006d3e80	pipeline::pqw::emit_dict_page_strs
+00000000006d4060	pipeline::pqw::plan
+00000000006d4980	pipeline::pqw::footer
+00000000006d61e0	pipeline::pqw::rle_vec
+00000000006d6ac0	pipeline::pqw::null_page
+00000000006d6ea0	pipeline::pqw::plan_ints
+00000000006d7be0	pipeline::sys::exit_release
+00000000006d81a0	pipeline::sys::anon
+00000000006d8300	pipeline::sys::worker
+00000000006d89c0	pipeline::sys::big_put
+00000000006d8a40	pipeline::sys::big_take
+00000000006d8be0	pipeline::sys::fallback
+00000000006d8d40	pipeline::sys::mem_test
+00000000006d9a60	pipeline::sys::on_fault
+00000000006d9ac0	pipeline::v3b::dd_drain_s
+00000000006d9e80	pipeline::v3b::dd_drain_w
+00000000006da480	pipeline::v3b::dd_push_s2
+00000000006da5c0	pipeline::v3b::build_links
+00000000006dfea0	pipeline::v3b::copy_slices
+00000000006e03c0	pipeline::v3b::ua_clicks_w
+00000000006e0580	pipeline::v3b::ua_events_w
+00000000006e0720	pipeline::v3b::clear_parquet
+00000000006e0ac0	pipeline::v3b::credit_sorted
+00000000006e3360	pipeline::v3b::finish_person
+00000000006e53a0	pipeline::v3b::die
+00000000006e53e0	pipeline::v3b::run
+00000000006f5da0	pipeline::v3b::ck_c
+00000000006f5f60	pipeline::v3b::ck_f
+00000000006f6060	pipeline::v3b::ev_le
+00000000006f6200	pipeline::v3b::ev_se
+00000000006f6340	pipeline::v3b::ev_xl
+00000000006f64a0	pipeline::v3b::forced
+00000000006f6660	pipeline::v3b::id_cmp
+00000000006f6ae0	pipeline::v3b::ck_wide
+00000000006f6e40	pipeline::v3b::id_text
+00000000006f7480	pipeline::v3b::xpm_end
+00000000006f77c0	pipeline::v3b::dd_run_s
+00000000006f79c0	pipeline::v3b::dd_run_w
+00000000006f7e00	pipeline::v3b::rel_mode
+00000000006f8200	pipeline::v3b::dd_mark_s
+00000000006f8360	pipeline::v3b::dd_mark_w
+00000000006f8660	pipeline::v3b::dd_push_s
+00000000006f8760	pipeline::v3b::dd_push_w
+00000000006f8900	pipeline::v3b::dd_scan_s
+00000000006f8be0	pipeline::v3b::dd_scan_w
+00000000006f9340	pipeline::v3b::rel_range
+00000000006f94c0	pipeline::v3b::scan_bins
+00000000006f9a60	pipeline::v3b::ua_clicks
+00000000006f9ba0	pipeline::v3b::ua_events
+00000000006f9e00	pipeline::ckix::ck_vec_ix
+00000000006fa3a0	pipeline::k_ref::days_from_civil
+00000000006fa480	pipeline::k_ref::parse_id
+00000000006fa780	pipeline::links::k8_inplace
+00000000006fcb20	pipeline::links::k8_rows_ix
+00000000006fd760	pipeline::links::links_done
+00000000006fd980	pipeline::links::sort_bench
+0000000000702600	pipeline::links::sort_users
+0000000000703560	pipeline::links::k8_tie_rows
+0000000000703760	pipeline::links::radix_split
+0000000000704600	pipeline::links::resolve_token
+00000000007049e0	pipeline::links::job
+00000000007083c0	pipeline::links::bucket
+000000000070dce0	pipeline::links::defer8
+000000000070e240	pipeline::links::k8_fix
+000000000070e280	pipeline::links::k8_mid
+0000000000710660	pipeline::links::k8_put
+0000000000710680	pipeline::links::k8_tie
+0000000000710e20	pipeline::links::fix_odd
+0000000000711000	pipeline::links::k8_part
+0000000000712fa0	pipeline::links::k8_put2
+0000000000713500	pipeline::links::k8_rows
+0000000000714100	pipeline::links::k8_user
+00000000007164c0	pipeline::links::place_a
+00000000007169e0	pipeline::links::prelude
+000000000071a280	pipeline::links::uf_tail
+000000000071bce0	pipeline::links::fix_ties
+000000000071c140	pipeline::links::k8_whale
+000000000071dd20	pipeline::links::links_ix
+000000000071e380	pipeline::links::lsd_sort
+000000000071e7a0	pipeline::links::piece_ix
+000000000071e8a0	pipeline::links::rows_out
+000000000071ee00	pipeline::links::sort_big
+000000000071f0a0	pipeline::links::convert16
+000000000071f600	pipeline::links::link_recs
+000000000071f780	pipeline::links::slow_from
+000000000071f7c0	pipeline::links::slow_sort
+000000000071f820	pipeline::links::tie_group
+00000000007202e0	pipeline::parse::links_chunk
+00000000007204c0	pipeline::parse::init_tabs_shared
+00000000007206a0	pipeline::parse::fault_around_check
+0000000000720c20	pipeline::parse::fr_done
+0000000000721180	pipeline::parse::lk_loop
+00000000007212a0	pipeline::parse::lk_batch
+0000000000721b60	pipeline::parse::link_slow
+0000000000721f00	pipeline::setup::manifest_ts
+0000000000722340	pipeline::setup::products_merge
+0000000000722d20	pipeline::setup::list
+00000000007233e0	pipeline::setup::setup
+00000000007295c0	pipeline::setup::split2
+0000000000729b20	pipeline::setup::ckix_mode
+0000000000729ec0	pipeline::setup::click_key
+000000000072af40	pipeline::setup::io_advise
+000000000072b360	pipeline::events::cred_count
+000000000072b440	pipeline::events::digest_put
+000000000072bb60	pipeline::events::purch_scan
+000000000072bc80	pipeline::events::run_clicks
+000000000072ca80	pipeline::events::simple_run
+000000000072e5a0	pipeline::events::edge_copy_k
+000000000072e7c0	pipeline::events::flush_names
+000000000072eda0	pipeline::events::light_flush
+000000000072ef60	pipeline::events::odd_records
+000000000072f020	pipeline::events::process_run
+000000000072f520	pipeline::events::pass_b
+000000000072f9e0	pipeline::events::cid_cmp
+000000000072fda0	pipeline::events::put_dup
+000000000072fdc0	pipeline::events::purch_add
+000000000072ff40	pipeline::events::walk_runs
+0000000000730680	pipeline::k_free::ev_purchase
+0000000000730840	pipeline::k_free::fix_ts
+00000000005d1d44	pipeline::k_free::keep_k
+0000000000730aa0	pipeline::k_free::cl_loop
+0000000000732c80	pipeline::k_free::cold_ts
+0000000000732f00	pipeline::k_free::cold_dec
+00000000007334c0	pipeline::k_free::cold_ids
+0000000000733e00	pipeline::k_free::cold_kind
+00000000007340c0	pipeline::k_free::date_miss
+00000000007342e0	pipeline::keyrec::search_key
+0000000000734540	pipeline::keyrec::days_from_civil
+0000000000734620	pipeline::keyrec::recover_user_key
+00000000007364a0	pipeline::keyrec::recover_event_key
+0000000000737420	pipeline::complex::stage4_pre
+0000000000737f60	pipeline::complex::shard_order
+0000000000738440	pipeline::complex::person_shard
+0000000000739ec0	pipeline::complex::clicks_a
+000000000073aa80	pipeline::generic::clear_parquet
+000000000073af40	pipeline::v3b::pm3::rd
+000000000073afe0	pipeline::v3b::pkpm::rd
+000000000073b060	pipeline::v3b::pkpm::lap
+000000000073b440	pipeline::v3b::pkpm::init
+000000000073b550	pipeline::k_free::slow::days_from_civil
+000000000073b620	pipeline::k_free::slow::civil_ms
+000000000073b8c0	pipeline::k_free::slow::parse_ts
+000000000073bb80	pipeline::generic::core::build_links
+000000000073cb80	pipeline::generic::core::credit
+000000000073d020	pipeline::generic::util::map_dir
+000000000073d3e0	pipeline::generic::parse::parse_price
+000000000073d560	pipeline::generic::parse::days_from_civil
+000000000073d620	pipeline::generic::parse::civil
+000000000073d900	pipeline::generic::parse::chunks
+000000000073dc00	pipeline::generic::parse::parse_ts
+000000000073dfc0	<core::iter::adapters::filter::Filter<core::iter::adapters::map::Map<core::iter::adapters::filter_map::FilterMap<std::fs::ReadDir, pipeline::generic::util::map_dir::{closure#0}>, pipeline::generic::util::map_dir::{closure#1}>, pipeline::generic::util::map_dir::{closure#2}> as core::iter::traits::iterator::Iterator>::next
+000000000073f100	<alloc::vec::Vec<core::option::Option<(alloc::vec::Vec<(u32, u8)>, alloc::vec::Vec<alloc::vec::Vec<u8>>)>> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<core::option::Option<(alloc::vec::Vec<(u32, u8)>, alloc::vec::Vec<alloc::vec::Vec<u8>>)>, core::iter::adapters::map::Map<core::slice::iter::Iter<pipeline::setup::Slot<core::option::Option<(alloc::vec::Vec<(u32, u8)>, alloc::vec::Vec<alloc::vec::Vec<u8>>)>>>, pipeline::setup::setup_par::{closure#7}::{closure#1}>>>::from_iter
+000000000073f300	<alloc::vec::Vec<std::sync::poison::mutex::Mutex<alloc::vec::Vec<(&[u8], u64, &[u8], u64)>>> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<std::sync::poison::mutex::Mutex<alloc::vec::Vec<(&[u8], u64, &[u8], u64)>>, core::iter::adapters::map::Map<core::ops::range::Range<usize>, pipeline::generic::run::{closure#7}>>>::from_iter
+000000000073f4a0	<alloc::vec::Vec<&[u8]> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<&[u8], core::iter::adapters::map::Map<core::slice::iter::Iter<pipeline::generic::util::Mapped>, pipeline::generic::run::{closure#4}>>>::from_iter
+000000000073f620	<alloc::vec::Vec<&[u8]> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<&[u8], core::iter::adapters::map::Map<core::slice::iter::Iter<(&[u8], &[u8])>, pipeline::generic::run::{closure#2}>>>::from_iter
